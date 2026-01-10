@@ -1,0 +1,52 @@
+name: "Release Build"
+
+on:
+  push:
+    tags:
+      - 'v*' # 只要你打标签比如 v0.1.0 就会触发
+
+jobs:
+  publish:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "1. 拉取代码"
+        uses: actions/checkout@v4
+
+      - name: "2. 安装 Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: "3. 安装 Rust 环境"
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: "4. 安装 Linux 构建依赖和 RPM 工具"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            build-essential \
+            curl \
+            wget \
+            file \
+            libssl-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            rpm
+
+      - name: "5. 安装前端项目依赖"
+        run: npm install
+
+      - name: "6. 执行 Tauri 打包任务"
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: "Easy Proton v${{ github.ref_name }}"
+          releaseBody: "感谢使用 Easy Proton！这是为您自动构建的 RPM/DEB/AppImage 安装包。"
+          releaseDraft: true
+          prerelease: false
