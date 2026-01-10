@@ -32,9 +32,6 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "publisher": "WuCaiCaiCai",
-    "linux": {
-      "desktopTemplate": null
-    }
+    "publisher": "WuCaiCaiCai"
   }
 }
