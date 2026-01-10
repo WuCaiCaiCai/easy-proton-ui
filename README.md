@@ -1,73 +1,35 @@
-# React + TypeScript + Vite
+# 🚀 Easy Proton UI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Easy Proton UI** 是一个基于 Tauri 和 Rust 构建的轻量级 Linux 游戏启动器。它专为解决 Linux 玩家在运行非 Steam 游戏（尤其是 Galgame）时遇到的 Proton 配置繁琐、汉化补丁失效、路径管理乱等痛点而生。
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## ✨ 功能特性 (Features)
 
-## React Compiler
+- 🛠️ **一键配置 (Simple Setup)**: 轻松指定不同的 Proton 版本和独立的环境容器 (Prefix)。
+- 🏮 **汉化补丁支持 (Translation Patch Support)**: 自动配置 `WINEDLLOVERRIDES`，完美加载 `dinput8.dll`, `dsound.dll` 等常见汉化插件。
+- 🌍 **本地化优化 (Locale Optimization)**: 预设 `zh_CN.UTF-8` 环境，告别游戏内乱码。
+- 🚀 **极速启动 (High Performance)**: 基于 Rust 后端，几乎不占系统资源。
+- 💾 **自动保存 (Auto-save)**: 自动记忆上次运行的配置，下次启动只需一键。
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 📸 屏幕截图 (Screenshots)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+*(此处可以上传一张你软件运行时的截图)*
+![App Screenshot](https://via.placeholder.com/800x450?text=Easy+Proton+UI+Running)
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## 🛠️ 安装与运行 (Installation)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### 环境要求
+- [Rust](https://www.rust-lang.org/) (latest stable)
+- [Node.js](https://nodejs.org/) (v18+)
+- [Tauri CLI](https://tauri.app/v2/guides/getting-started/beginning-tutorial/)
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### 开始使用
+1. **克隆仓库**:
+   ```bash
+   git clone [https://github.com/YOUR_USERNAME/easy-proton-ui.git](https://github.com/YOUR_USERNAME/easy-proton-ui.git)
+   cd easy-proton-ui
