@@ -1,35 +1,37 @@
 # 🚀 Easy Proton UI
 
-**Easy Proton UI** 是一个基于 Tauri 和 Rust 构建的轻量级 Linux 游戏启动器。它专为解决 Linux 玩家在运行非 Steam 游戏（尤其是 Galgame）时遇到的 Proton 配置繁琐、汉化补丁失效、路径管理乱等痛点而生。
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Tauri v2](https://img.shields.io/badge/Tauri-v2-blue)](https://tauri.app/)
+[![Rust](https://img.shields.io/badge/Built%20with-Rust-orange)](https://www.rust-lang.org/)
+
+**Easy Proton UI** 是一个为 Linux 用户设计的轻量级、开源 Proton 启动器。它专注于简化非 Steam 游戏的运行流程，尤其是 Galgame 等需要复杂环境配置和汉化补丁加载的游戏。
 
 ---
 
-## ✨ 功能特性 (Features)
+## ✨ 功能特性
 
-- 🛠️ **一键配置 (Simple Setup)**: 轻松指定不同的 Proton 版本和独立的环境容器 (Prefix)。
-- 🏮 **汉化补丁支持 (Translation Patch Support)**: 自动配置 `WINEDLLOVERRIDES`，完美加载 `dinput8.dll`, `dsound.dll` 等常见汉化插件。
-- 🌍 **本地化优化 (Locale Optimization)**: 预设 `zh_CN.UTF-8` 环境，告别游戏内乱码。
-- 🚀 **极速启动 (High Performance)**: 基于 Rust 后端，几乎不占系统资源。
-- 💾 **自动保存 (Auto-save)**: 自动记忆上次运行的配置，下次启动只需一键。
-
----
-
-## 📸 屏幕截图 (Screenshots)
-
-*(此处可以上传一张你软件运行时的截图)*
-![App Screenshot](https://via.placeholder.com/800x450?text=Easy+Proton+UI+Running)
+- 🛠️ **环境解耦**：为每个游戏指定独立的 Proton 版本和 Prefix 路径。
+- 🏮 **补丁注入**：自动配置 `WINEDLLOVERRIDES`，确保汉化 DLL 优先加载。
+- 🌍 **本地化预设**：默认启用 `zh_CN.UTF-8`，解决游戏乱码问题。
+- ⚡ **极速响应**：基于 Tauri 2.0 + Rust 架构，启动快且占用内存低。
+- 💾 **智能记忆**：自动保存游戏配置，实现“配置一次，终身运行”。
 
 ---
 
-## 🛠️ 安装与运行 (Installation)
+## 🛠️ 安装与编译
 
-### 环境要求
-- [Rust](https://www.rust-lang.org/) (latest stable)
-- [Node.js](https://nodejs.org/) (v18+)
-- [Tauri CLI](https://tauri.app/v2/guides/getting-started/beginning-tutorial/)
+从源码构建的步骤如下：
 
-### 开始使用
-1. **克隆仓库**:
-   ```bash
-   git clone [https://github.com/YOUR_USERNAME/easy-proton-ui.git](https://github.com/YOUR_USERNAME/easy-proton-ui.git)
-   cd easy-proton-ui
+```bash
+# 安装依赖 (以 Debian/Ubuntu 为例)
+sudo apt update && sudo apt install -y \
+    libwebkit2gtk-4.1-dev build-essential curl wget file \
+    libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+
+# 克隆仓库
+git clone https://github.com/WuCaiCaiCai/easy-proton-ui.git
+cd easy-proton-ui
+
+# 安装依赖并运行
+npm install
+npm run tauri dev
