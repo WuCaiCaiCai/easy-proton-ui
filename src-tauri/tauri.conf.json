@@ -24,11 +24,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": [
-      "rpm",
-      "deb",
-      "appimage"
-    ],
+    "targets": ["rpm", "deb", "appimage"],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -38,13 +34,7 @@
     ],
     "publisher": "WuCaiCaiCai",
     "linux": {
-      "shortDescription": "Lightweight Proton/PFX Manager",
-      "longDescription": "A simple tool to manage Wine Prefixes and Proton versions for Windows games on Linux."
-    },
-    "rpm": {
-      "depends": [
-        "webkit2gtk4.1"
-      ]
+      "desktopTemplate": null
     }
   }
 }
