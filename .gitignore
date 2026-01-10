@@ -1,0 +1,37 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+# --- Tauri / Rust Specific ---
+# 存放 Rust 编译生成的二进制文件和中间件，体积巨大
+/src-tauri/target/
+
+# 存放生成的权限架构，通常不建议手动修改或追踪
+/src-tauri/gen/
+
+# 如果你使用的是 Cargo 的各种锁文件，通常开源项目建议保留 Cargo.lock 
+# 但如果你想让它像 npm 的 package-lock.json 一样严格，就不要忽略它。
+# 一般建议不忽略：# /src-tauri/Cargo.lock
+
+# 排除 Tauri 自动生成的日志
+/src-tauri/*.log
