@@ -67,7 +67,7 @@ async fn launch_proton(config: AppConfig, envs: String) -> Result<String, String
     // B. Proton 运行必需的环境变量
     cmd.env("STEAM_COMPAT_DATA_PATH", &config.prefix);
     // 即使没装 Steam，Proton 也需要这个路径来寻找 runtime，通常指向 .steam 根目录
-    cmd.env("STEAM_COMPAT_CLIENT_INSTALL_PATH", "/home/wucai/.steam/root");
+    cmd.env("STEAM_COMPAT_CLIENT_INSTALL_PATH", "~/.steam/root");
 
     // C. 解决中文乱码和补丁加载
     cmd.env("LC_ALL", "zh_CN.UTF-8");
