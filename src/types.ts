@@ -5,6 +5,7 @@ export interface AppConfig {
 }
 
 export interface GameRecord extends AppConfig {
-    name: string;
+    name: string;    // 最终显示的名字
     time: number;
+    icon?: string;   // 本地拷贝后的图标路径
 }
