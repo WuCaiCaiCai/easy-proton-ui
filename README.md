@@ -35,3 +35,12 @@ cd easy-proton-ui
 # 安装依赖并运行
 npm install
 npm run tauri dev
+```
+
+
+
+# ToDo
+
+- [x] 最近游戏功能（logo显示有问题，改用svg统一图标）
+- [ ] 界面优化
+- [ ] 版本号发行自动更新
