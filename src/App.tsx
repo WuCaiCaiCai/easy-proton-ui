@@ -1,40 +1,56 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { open } from "@tauri-apps/plugin-dialog";
+import { LazyStore } from "@tauri-apps/plugin-store";
+
+// 引入我们拆分出去的模块
+import type { AppConfig, GameRecord } from "./types";
+import { GameCard } from "./components/GameCard";
+import { PathSelector } from "./components/PathSelector";
+
+
+const store = new LazyStore(".proton_history.json");
 
 function App() {
-  const [config, setConfig] = useState({ proton: "", prefix: "", game: "" });
+  const [config, setConfig] = useState<AppConfig>({ proton: "", prefix: "", game: "" });
+  const [history, setHistory] = useState<GameRecord[]>([]);
   const [logs, setLogs] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // 初始化加载配置
+  // 加载配置和历史
   useEffect(() => {
-    invoke("load_config")
-      .then((res: any) => setConfig(res))
-      .catch(() => console.log("未找到预存配置"));
+    invoke("load_config").then((res: any) => res && setConfig(res)).catch(console.error);
+    store.get<GameRecord[]>("history").then(data => data && setHistory(data));
   }, []);
 
-  const selectPath = async (target: 'proton' | 'prefix' | 'game') => {
-    const selected = await open({
-      directory: target === 'prefix',
-      multiple: false,
-    });
-    if (selected && typeof selected === 'string') {
-      const newConfig = { ...config, [target]: selected };
-      setConfig(newConfig);
-      // 选择后自动保存一次
-      invoke("save_config", { config: newConfig }).catch(console.error);
+  const handleLaunch = async (overrideConfig?: AppConfig) => {
+    const target = overrideConfig || config;
+    if (!target.proton || !target.prefix || !target.game) {
+      alert("路径不完整");
+      return;
     }
-  };
 
-  const handleLaunch = async () => {
     setIsLoading(true);
-    setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] 准备启动...`]);
+    setLogs(p => [...p, `正在启动: ${target.game}`]);
+
     try {
-      const result = await invoke<string>("launch_proton", { config, envs: "" });
-      setLogs(prev => [...prev, `[INFO] ${result}`]);
-    } catch (err) {
-      setLogs(prev => [...prev, `[ERROR] ${err}`]);
+      // 注意：这里调用的是 Rust 里的 launch_proton
+      await invoke("launch_proton", { config: target, envs: "" });
+      
+      // 保存到历史记录
+      const name = target.game.split(/[\\/]/).pop()?.replace(".exe", "") || "未知";
+      const newRecord: GameRecord = { ...target, name, time: Date.now() };
+      
+      // 更新历史 (去重)
+      const newHistory = [newRecord, ...history.filter(h => h.game !== target.game)];
+      setHistory(newHistory);
+      store.set("history", newHistory);
+      store.save();
+      
+      // 保存最后一次配置
+      invoke("save_config", { config: target });
+
+    } catch (err: any) {
+      setLogs(p => [...p, `[错误] ${err}`]);
     } finally {
       setIsLoading(false);
     }
@@ -42,73 +58,65 @@ function App() {
 
   return (
     <div style={{ 
-      display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw',
+      padding: '30px', height: '100vh', boxSizing: 'border-box',
       backgroundColor: '#0f111a', color: '#eceff4', fontFamily: 'sans-serif',
-      boxSizing: 'border-box', overflow: 'hidden'
+      display: 'flex', flexDirection: 'column', gap: '20px'
     }}>
-      {/* 顶部标题栏 */}
-      <div style={{ padding: '20px 30px', background: '#1a1c25', borderBottom: '1px solid #2e3440' }}>
-        <h1 style={{ margin: 0, fontSize: '24px', color: '#88c0d0' }}>EasyProton 🚀</h1>
-        <p style={{ margin: '5px 0 0', fontSize: '12px', color: '#d8dee9', opacity: 0.6 }}>现代化的 Proton 游戏启动方案</p>
+      <h1 style={{ color: '#88c0d0', margin: 0 }}>EasyProton 🚀</h1>
+
+      {/* 游戏库区域 */}
+      <div>
+        <h3 style={{ fontSize: '14px', color: '#666' }}>最近游戏</h3>
+        <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', padding: '5px' }}>
+          {history.length === 0 && <span style={{fontSize: '12px'}}>暂无记录</span>}
+          {history.map(record => (
+            <GameCard 
+              key={record.game} 
+              record={record} 
+              onClick={() => { setConfig(record); handleLaunch(record); }} 
+            />
+          ))}
+        </div>
       </div>
 
-      {/* 主体区域 */}
-      <div style={{ flex: 1, padding: '30px', display: 'flex', flexDirection: 'column', gap: '20px', overflowY: 'auto' }}>
-        {[
-          { label: 'Proton 脚本 (proton)', key: 'proton' },
-          { label: 'Prefix 容器 (pfx)', key: 'prefix' },
-          { label: '游戏程序 (exe)', key: 'game' },
-        ].map((item) => (
-          <div key={item.key} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '13px', fontWeight: 600, color: '#81a1c1' }}>{item.label}</label>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <input 
-                value={(config as any)[item.key]} 
-                readOnly 
-                placeholder="点击右侧选择路径..."
-                style={{ 
-                  flex: 1, padding: '12px', borderRadius: '6px', border: '1px solid #3b4252',
-                  backgroundColor: '#2e3440', color: '#eceff4', outline: 'none'
-                }} 
-              />
-              <button 
-                onClick={() => selectPath(item.key as any)}
-                style={{ 
-                  padding: '0 20px', borderRadius: '6px', border: 'none', 
-                  backgroundColor: '#4c566a', color: '#fff', cursor: 'pointer', transition: '0.2s'
-                }}
-              >选择</button>
-            </div>
-          </div>
-        ))}
+      <hr style={{ borderColor: '#2e3440' }} />
 
-        <button 
-          onClick={handleLaunch}
-          disabled={isLoading}
-          style={{ 
-            marginTop: '10px', padding: '16px', borderRadius: '8px', border: 'none',
-            backgroundColor: isLoading ? '#4c566a' : '#5e81ac', 
-            color: '#fff', fontSize: '16px', fontWeight: 'bold', 
-            cursor: isLoading ? 'not-allowed' : 'pointer', transition: '0.3s'
-          }}
-        >
-          {isLoading ? "游戏运行中..." : "运行游戏"}
-        </button>
+      {/* 路径选择区域 */}
+      <PathSelector 
+        label="Proton 路径 (runner)" 
+        placeholder="选择 proton 文件" 
+        value={config.proton} 
+        onSelect={(p) => setConfig(prev => ({...prev, proton: p}))} 
+      />
+      <PathSelector 
+        label="Prefix 容器 (pfx)" 
+        placeholder="选择 pfx 文件夹" 
+        value={config.prefix} 
+        isDirectory={true}
+        onSelect={(p) => setConfig(prev => ({...prev, prefix: p}))} 
+      />
+      <PathSelector 
+        label="游戏执行文件 (exe)" 
+        placeholder="选择游戏 exe" 
+        value={config.game} 
+        onSelect={(p) => setConfig(prev => ({...prev, game: p}))} 
+      />
 
-        {/* 日志框 */}
-        <div style={{ flex: 1, minHeight: '150px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '12px', color: '#666' }}>实时日志</span>
-            <button onClick={() => setLogs([])} style={{ background: 'none', border: 'none', color: '#81a1c1', cursor: 'pointer', fontSize: '12px' }}>清空日志</button>
-          </div>
-          <div style={{ 
-            flex: 1, backgroundColor: '#000', borderRadius: '8px', padding: '15px',
-            fontSize: '13px', color: '#a3be8c', border: '1px solid #2e3440',
-            overflowY: 'auto', whiteSpace: 'pre-wrap'
-          }}>
-            {logs.length === 0 ? <span style={{ color: '#4c566a' }}>等待输入...</span> : logs.map((l, i) => <div key={i}>{l}</div>)}
-          </div>
-        </div>
+      {/* 启动按钮 */}
+      <button 
+        onClick={() => handleLaunch()}
+        disabled={isLoading}
+        style={{
+          padding: '15px', backgroundColor: isLoading ? '#4c566a' : '#5e81ac',
+          color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold'
+        }}
+      >
+        {isLoading ? "运行中..." : "启动游戏"}
+      </button>
+
+      {/* 简易日志 */}
+      <div style={{ flex: 1, backgroundColor: 'black', padding: '10px', borderRadius: '8px', fontSize: '12px', color: '#a3be8c', overflowY: 'auto' }}>
+         {logs.map((l, i) => <div key={i}>{l}</div>)}
       </div>
     </div>
   );
