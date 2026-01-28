@@ -1,29 +1,54 @@
-name: "Release Build"
+name: "Tauri Release Build"
 
 on:
   push:
     tags:
-      - 'v*' # 只要你打标签比如 v0.1.0 就会触发
+      - 'v*' # 推送 v* 标签时触发
+  workflow_dispatch: # 允许手动触发
+    inputs:
+      version:
+        description: '版本号 (例如: v0.2.1)'
+        required: true
+        default: 'v0.2.1'
 
 jobs:
-  publish:
+  publish-tauri:
     permissions:
       contents: write
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ubuntu-latest]
 
+    runs-on: ${{ matrix.platform }}
     steps:
-      - name: "1. 拉取代码"
+      - name: "1. 检查代码"
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: "2. 安装 Node.js"
+      - name: "2. 清除缓存"
+        run: |
+          # 清除可能的缓存
+          rm -rf ~/.cargo/registry
+          rm -rf ~/.cargo/git
+          rm -rf node_modules
+          rm -rf src-tauri/target
+
+      - name: "3. 安装 Node.js"
         uses: actions/setup-node@v4
         with:
-          node-version: lts/*
+          node-version: '20'
+          cache: 'npm'
 
-      - name: "3. 安装 Rust 环境"
+      - name: "4. 安装 Rust 工具链"
         uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          targets: x86_64-unknown-linux-gnu
 
-      - name: "4. 安装 Linux 构建依赖和 RPM 工具"
+      - name: "5. 安装 Linux 构建依赖"
+        if: matrix.platform == 'ubuntu-latest'
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -35,20 +60,84 @@ jobs:
             libssl-dev \
             libayatana-appindicator3-dev \
             librsvg2-dev \
-            rpm
+            libgtk-3-dev \
+            libsoup-3.0-dev \
+            libjavascriptcoregtk-4.1-dev \
+            rpm \
+            patchelf
 
-      - name: "5. 安装前端项目依赖"
-        run: npm install
+      - name: "6. 验证版本号"
+        run: |
+          echo "=== 验证版本号 ==="
+          echo "package.json: $(node -p \"require('./package.json').version\")"
+          echo "Cargo.toml: $(grep '^version =' src-tauri/Cargo.toml)"
+          echo "tauri.conf.json: $(grep -o '\"version\":\"[^\"]*\"' src-tauri/tauri.conf.json)"
+          echo "Git标签: ${{ github.ref_name }}"
 
-      - name: "6. 执行 Tauri 打包任务"
+      - name: "7. 安装项目依赖"
+        run: |
+          npm ci --no-audit
+          cd src-tauri && cargo fetch
+
+      - name: "8. 构建前端"
+        run: npm run build
+
+      - name: "9. 执行 Tauri 构建"
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: ${{ github.ref_name }}
-          releaseName: "Easy Proton v${{ github.ref_name }}"
-          releaseBody: "感谢使用 Easy Proton！这是为您自动构建的 RPM/DEB/AppImage 安装包。"
+          tagName: ${{ github.ref_name || inputs.version }}
+          releaseName: "Easy Proton ${{ github.ref_name || inputs.version }}"
+          releaseBody: |
+            ## 🎮 Easy Proton ${{ github.ref_name || inputs.version }}
+
+            ### 下载
+            - **.deb**: Debian/Ubuntu 用户
+            - **.rpm**: Fedora/RHEL 用户
+            - **.AppImage**: 通用Linux发行版
+
+            ### 安装说明
+            1. 下载对应的安装包
+            2. 双击安装或使用包管理器安装
+            3. 运行 Easy Proton
+
+            ### 注意事项
+            - 需要已安装 Proton 环境
+            - 首次使用请设置 Proton 路径
           releaseDraft: true
           prerelease: false
+          includeUpdaterJson: false
+          includeReleaseNotes: true
 
+      - name: "10. 验证构建产物版本"
+        run: |
+          echo "=== 验证构建产物 ==="
+          if [ -f src-tauri/target/release/bundle/rpm/*.rpm ]; then
+            rpm -qip src-tauri/target/release/bundle/rpm/*.rpm | grep -E "Version|Release"
+          fi
+          if [ -f src-tauri/target/release/bundle/deb/*.deb ]; then
+            dpkg-deb -I src-tauri/target/release/bundle/deb/*.deb | grep Version
+          fi
+
+      - name: "11. 上传构建产物"
+        uses: actions/upload-artifact@v4
+        with:
+          name: easy-proton-build-${{ github.ref_name || inputs.version }}
+          path: |
+            src-tauri/target/release/bundle/**/*.deb
+            src-tauri/target/release/bundle/**/*.rpm
+            src-tauri/target/release/bundle/**/*.AppImage
+          retention-days: 7
+
+  notify:
+    needs: publish-tauri
+    runs-on: ubuntu-latest
+    if: success()
+    steps:
+      - name: "构建成功通知"
+        run: |
+          echo "🎉 Easy Proton ${{ github.ref_name || inputs.version }} 构建成功！"
+          echo "📦 发布包已上传到 GitHub Releases"
+          echo "🔗 前往 https://github.com/${{ github.repository }}/releases 查看"
 
