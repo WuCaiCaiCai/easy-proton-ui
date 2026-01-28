@@ -49,28 +49,63 @@ pub async fn force_close_games() -> Result<String, String> {
 
     let mut closed_count = 0;
     
+    // 获取当前进程ID，避免关闭自己
+    let current_pid = std::process::id();
+    
     // 查找并关闭可能的游戏进程
     for (pid, process) in system.processes() {
+        // 跳过当前进程（Easy Proton 软件本身）
+        if pid.as_u32() == current_pid {
+            continue;
+        }
+        
         let name = process.name().to_lowercase();
         
-        // 常见的游戏进程名或Wine/Proton相关进程
-        if name.contains(".exe") || 
-           name.contains("wine") || 
-           name.contains("proton") ||
-           name.contains("steam") ||
-           name.ends_with("64") ||
-           name.ends_with("32") {
-            
+        // 更精确的游戏进程识别
+        // 1. 排除系统关键进程
+        if name.contains("systemd") || 
+           name.contains("dbus") || 
+           name.contains("pulseaudio") ||
+           name.contains("xorg") ||
+           name.contains("gnome") ||
+           name.contains("kde") ||
+           name.contains("easy-proton") ||  // 排除软件本身
+           name.contains("tauri") {          // 排除 Tauri 相关进程
+            continue;
+        }
+        
+        // 2. 识别游戏相关进程
+        let is_game_process = 
+            // Windows 可执行文件
+            name.ends_with(".exe") ||
+            // Wine/Proton 相关进程
+            (name.contains("wine") && !name.contains("wineserver")) ||
+            name.contains("proton") ||
+            // Steam 游戏进程
+            (name.contains("steam") && name.contains("game")) ||
+            // 常见的游戏进程名模式
+            name.contains("game") ||
+            name.contains("hl2") ||
+            name.contains("dota") ||
+            name.contains("csgo") ||
+            name.contains("tf2") ||
+            // 64位/32位可执行文件
+            (name.ends_with("64") && name.len() > 2) ||
+            (name.ends_with("32") && name.len() > 2);
+        
+        if is_game_process {
             // 尝试优雅关闭
             if process.kill() {
                 closed_count += 1;
-                log::info!("已关闭进程: {} (PID: {})", name, pid);
+                log::info!("已关闭游戏进程: {} (PID: {})", name, pid);
+            } else {
+                log::warn!("无法关闭进程: {} (PID: {})", name, pid);
             }
         }
     }
 
     if closed_count > 0 {
-        Ok(format!("已强制关闭 {} 个游戏相关进程", closed_count))
+        Ok(format!("已强制关闭 {} 个游戏进程", closed_count))
     } else {
         Ok("未找到需要关闭的游戏进程".into())
     }

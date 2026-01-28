@@ -7,9 +7,9 @@ on:
   workflow_dispatch: # 允许手动触发
     inputs:
       version:
-        description: '版本号 (例如: v0.2.1)'
+        description: '版本号 (例如: v0.2.1, v0.3.0)'
         required: true
-        default: 'v0.2.1'
+        # 不设置默认值，让用户手动输入
 
 jobs:
   publish-tauri:
@@ -108,7 +108,6 @@ jobs:
           releaseDraft: true
           prerelease: false
           includeUpdaterJson: false
-          includeReleaseNotes: true
 
       - name: "10. 验证构建产物版本"
         run: |
