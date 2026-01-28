@@ -56,13 +56,26 @@ OLD_VERSION=$(node -p "require('./package.json').version")
 npm version $VERSION_TYPE --no-git-tag-version
 NEW_VERSION=$(node -p "require('./package.json').version")
 
+print_info "前端版本从 $OLD_VERSION 更新到 $NEW_VERSION"
+
 # 更新Rust版本号
-sed -i "s/version = \"$OLD_VERSION\"/version = \"$NEW_VERSION\"/" src-tauri/Cargo.toml
+if grep -q "version = \"$OLD_VERSION\"" src-tauri/Cargo.toml; then
+    sed -i "s/version = \"$OLD_VERSION\"/version = \"$NEW_VERSION\"/" src-tauri/Cargo.toml
+    print_info "Rust版本已更新"
+else
+    print_warn "Rust版本号格式不匹配，手动检查 Cargo.toml"
+    echo "当前Cargo.toml版本: $(grep '^version =' src-tauri/Cargo.toml)"
+fi
 
-# 更新tauri.conf.json版本号
-sed -i "s/\"version\": \"$OLD_VERSION\"/\"version\": \"$NEW_VERSION\"/" src-tauri/tauri.conf.json
-
-print_info "版本从 $OLD_VERSION 更新到 $NEW_VERSION"
+# 更新tauri.conf.json版本号 - 修复JSON格式问题
+tauri_version_line=$(grep -o '"version":"[^"]*"' src-tauri/tauri.conf.json)
+if [[ $tauri_version_line =~ "version":"([^"]+)" ]]; then
+    OLD_TAURI_VERSION="${BASH_REMATCH[1]}"
+    sed -i "s/\"version\":\"$OLD_TAURI_VERSION\"/\"version\":\"$NEW_VERSION\"/" src-tauri/tauri.conf.json
+    print_info "Tauri配置版本从 $OLD_TAURI_VERSION 更新到 $NEW_VERSION"
+else
+    print_warn "无法解析tauri.conf.json中的版本号，手动检查"
+fi
 
 # 4. 生成更新日志
 print_info "4. 生成更新日志..."
