@@ -69,9 +69,9 @@ jobs:
       - name: "6. 验证版本号"
         run: |
           echo "=== 验证版本号 ==="
-          echo "package.json: $(node -p \"require('./package.json').version\")"
-          echo "Cargo.toml: $(grep '^version =' src-tauri/Cargo.toml)"
-          echo "tauri.conf.json: $(grep -o '\"version\":\"[^\"]*\"' src-tauri/tauri.conf.json)"
+          echo "package.json 版本: $(cat package.json | grep '\"version\"' | head -1 | awk -F: '{ print \$2 }' | sed 's/[,\"]//g' | tr -d '[:space:]')"
+          echo "Cargo.toml 版本: $(grep '^version =' src-tauri/Cargo.toml | sed 's/version = \"//' | sed 's/\"//')"
+          echo "tauri.conf.json 版本: $(grep -o '\"version\":\"[^\"]*\"' src-tauri/tauri.conf.json | sed 's/\"version\":\"//' | sed 's/\"//')"
           echo "Git标签: ${{ github.ref_name }}"
 
       - name: "7. 安装项目依赖"
