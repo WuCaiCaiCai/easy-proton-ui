@@ -3,6 +3,7 @@ use std::fs;
 use std::path::Path;
 use std::process::Command;
 use tauri::Manager;
+use sysinfo::System;
 
 #[tauri::command]
 pub async fn launch_proton(config: AppConfig) -> Result<String, String> {
@@ -39,4 +40,38 @@ pub async fn load_config(handle: tauri::AppHandle) -> Result<AppConfig, String> 
     }
     let content = fs::read_to_string(path).map_err(|e| e.to_string())?;
     serde_json::from_str(&content).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn force_close_games() -> Result<String, String> {
+    let mut system = System::new_all();
+    system.refresh_all();
+
+    let mut closed_count = 0;
+    
+    // 查找并关闭可能的游戏进程
+    for (pid, process) in system.processes() {
+        let name = process.name().to_lowercase();
+        
+        // 常见的游戏进程名或Wine/Proton相关进程
+        if name.contains(".exe") || 
+           name.contains("wine") || 
+           name.contains("proton") ||
+           name.contains("steam") ||
+           name.ends_with("64") ||
+           name.ends_with("32") {
+            
+            // 尝试优雅关闭
+            if process.kill() {
+                closed_count += 1;
+                log::info!("已关闭进程: {} (PID: {})", name, pid);
+            }
+        }
+    }
+
+    if closed_count > 0 {
+        Ok(format!("已强制关闭 {} 个游戏相关进程", closed_count))
+    } else {
+        Ok("未找到需要关闭的游戏进程".into())
+    }
 }

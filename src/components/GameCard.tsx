@@ -3,12 +3,17 @@ import type { GameRecord } from "../types";
 interface Props {
   record: GameRecord;
   onClick: () => void;
+  onEdit: () => void;
 }
 
-export function GameCard({ record, onClick }: Props) {
+export function GameCard({ record, onClick, onEdit }: Props) {
+  const [isHovered, setIsHovered] = useState(false);
+
   return (
     <div
       onClick={onClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       style={{
         minWidth: "140px",
         padding: "15px",
@@ -20,16 +25,40 @@ export function GameCard({ record, onClick }: Props) {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.borderColor = "#5e81ac";
-        e.currentTarget.style.transform = "translateY(-5px)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = "#2e3440";
-        e.currentTarget.style.transform = "translateY(0)";
+        position: "relative",
       }}
     >
+      {/* 编辑按钮 */}
+      {isHovered && (
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit();
+          }}
+          style={{
+            position: "absolute",
+            top: "8px",
+            right: "8px",
+            width: "24px",
+            height: "24px",
+            borderRadius: "50%",
+            backgroundColor: "rgba(46, 52, 64, 0.8)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            zIndex: 10,
+            border: "1px solid #4c566a",
+          }}
+          title="编辑游戏"
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#81a1c1" strokeWidth="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+          </svg>
+        </div>
+      )}
+
       <div
         style={{
           width: "100px",
@@ -61,6 +90,18 @@ export function GameCard({ record, onClick }: Props) {
       }}>
         {record.name}
       </div>
+
+      <div style={{
+        fontSize: "10px",
+        color: "#4c566a",
+        marginTop: "4px",
+        width: "100%",
+        textAlign: "center"
+      }}>
+        {new Date(record.time).toLocaleDateString()}
+      </div>
     </div>
   );
 }
+
+import { useState } from "react";

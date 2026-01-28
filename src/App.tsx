@@ -4,6 +4,7 @@ import { LazyStore } from "@tauri-apps/plugin-store";
 
 import type { AppConfig, GameRecord } from "./types";
 import { GameCard } from "./components/GameCard";
+import { EditModal } from "./components/EditModal";
 import { PathSelector } from "./components/PathSelector";
 
 const store = new LazyStore(".proton_history.json");
@@ -19,6 +20,9 @@ function App() {
   const [logs, setLogs] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [customName, setCustomName] = useState("");
+  const [forceCloseEnabled, setForceCloseEnabled] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<GameRecord | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // 1. 初始加载配置与历史记录
   useEffect(() => {
@@ -77,6 +81,48 @@ function App() {
       setLogs((prev) => [...prev, `启动失败: ${err}`]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // 3. 编辑游戏记录
+  const handleEditRecord = (record: GameRecord) => {
+    setEditingRecord(record);
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveEdit = (updatedRecord: GameRecord) => {
+    const newHistory = history.map(record => 
+      record.game === updatedRecord.game ? { ...updatedRecord, time: Date.now() } : record
+    );
+    setHistory(newHistory);
+    store.set("history", newHistory);
+    store.save();
+    setLogs((prev) => [...prev, `已更新游戏: ${updatedRecord.name}`]);
+  };
+
+  const handleDeleteRecord = (recordId: string) => {
+    const recordToDelete = history.find(r => r.game === recordId);
+    const newHistory = history.filter(record => record.game !== recordId);
+    setHistory(newHistory);
+    store.set("history", newHistory);
+    store.save();
+    if (recordToDelete) {
+      setLogs((prev) => [...prev, `已删除游戏: ${recordToDelete.name}`]);
+    }
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setEditingRecord(null);
+  };
+
+  // 4. 强制关闭功能
+  const handleForceClose = async () => {
+    try {
+      await invoke("force_close_games");
+      setLogs((prev) => [...prev, "已发送强制关闭信号"]);
+    } catch (err: any) {
+      setLogs((prev) => [...prev, `强制关闭失败: ${err}`]);
     }
   };
 
@@ -171,7 +217,12 @@ function App() {
           <div className="history-section">
             {history.length > 0 ? (
               history.map((record) => (
-                <GameCard key={record.game} record={record} onClick={() => handleLaunch(record)} />
+                <GameCard
+                  key={record.game}
+                  record={record}
+                  onClick={() => handleLaunch(record)}
+                  onEdit={() => handleEditRecord(record)}
+                />
               ))
             ) : (
               <div style={{ color: '#3b4252', fontSize: '13px', padding: '10px' }}>暂无记录</div>
@@ -212,37 +263,77 @@ function App() {
           />
         </section>
 
-        {/* 启动按钮 */}
-        <button
-          onClick={() => handleLaunch()}
-          disabled={isLoading}
-          style={{
-            padding: "18px",
-            backgroundColor: isLoading ? "#4c566a" : "#5e81ac",
-            color: "#fff",
-            border: "none",
-            borderRadius: "12px",
-            fontWeight: "bold",
-            fontSize: "16px",
-            cursor: isLoading ? "not-allowed" : "pointer",
-            boxShadow: '0 4px 15px rgba(94, 129, 172, 0.3)',
-            transition: 'background 0.2s'
-          }}
-        >
-          {isLoading ? "正在引导进程..." : "启动游戏"}
-        </button>
+        {/* 启动按钮和强制关闭按钮 */}
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button
+            onClick={() => handleLaunch()}
+            disabled={isLoading}
+            style={{
+              flex: 1,
+              padding: "18px",
+              backgroundColor: isLoading ? "#4c566a" : "#5e81ac",
+              color: "#fff",
+              border: "none",
+              borderRadius: "12px",
+              fontWeight: "bold",
+              fontSize: "16px",
+              cursor: isLoading ? "not-allowed" : "pointer",
+              boxShadow: '0 4px 15px rgba(94, 129, 172, 0.3)',
+              transition: 'background 0.2s'
+            }}
+          >
+            {isLoading ? "正在引导进程..." : "启动游戏"}
+          </button>
+
+          <button
+            onClick={handleForceClose}
+            disabled={isLoading}
+            style={{
+              padding: "18px 24px",
+              backgroundColor: forceCloseEnabled ? "#bf616a" : "#434c5e",
+              color: "#fff",
+              border: "none",
+              borderRadius: "12px",
+              fontWeight: "bold",
+              fontSize: "16px",
+              cursor: isLoading ? "not-allowed" : "pointer",
+              transition: 'background 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+            onMouseEnter={() => setForceCloseEnabled(true)}
+            onMouseLeave={() => setForceCloseEnabled(false)}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="15" y1="9" x2="9" y2="15" />
+              <line x1="9" y1="9" x2="15" y2="15" />
+            </svg>
+            强制关闭
+          </button>
+        </div>
 
         {/* 日志终端 */}
         <div className="log-terminal">
           <div style={{ color: '#4c566a', borderBottom: '1px solid #1a1c25', marginBottom: '8px', paddingBottom: '4px' }}>系统日志:</div>
           {logs.map((log, i) => (
             <div key={i}>
-              <span style={{ color: '#5e81ac', marginRight: '8px' }}>{" > "}</span>
+              <span style={{ color: '#5e81ac', marginRight: '8px' }}>{' > '}</span>
               {log}
             </div>
           ))}
         </div>
       </div>
+
+      {/* 编辑弹窗 */}
+      <EditModal
+        record={editingRecord}
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        onSave={handleSaveEdit}
+        onDelete={handleDeleteRecord}
+      />
     </div>
   );
 }
