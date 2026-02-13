@@ -1,3 +1,13 @@
+/**
+ * EasyProton - 主应用组件
+ * 
+ * 功能：
+ * - 管理游戏配置（Proton 路径、前缀、游戏路径）
+ * - 游戏历史和快速启动
+ * - 游戏进程管理
+ * - 配置持久化
+ */
+
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { LazyStore } from "@tauri-apps/plugin-store";
@@ -7,135 +17,199 @@ import { GameCard } from "./components/GameCard";
 import { EditModal } from "./components/EditModal";
 import { PathSelector } from "./components/PathSelector";
 
+// 持久化存储（JSON 文件）
 const store = new LazyStore(".proton_history.json");
 
+/**
+ * 应用主组件
+ */
 function App() {
+  // ========================================
+  // 状态定义
+  // ========================================
+
+  // 当前配置（默认值）
   const [config, setConfig] = useState<AppConfig>({
     proton: "",
     prefix: "",
     game: "",
   });
 
+  // 游戏历史记录
   const [history, setHistory] = useState<GameRecord[]>([]);
+
+  // 系统日志
   const [logs, setLogs] = useState<string[]>([]);
+
+  // UI 状态
   const [isLoading, setIsLoading] = useState(false);
   const [customName, setCustomName] = useState("");
-  const [forceCloseEnabled, setForceCloseEnabled] = useState(false);
   const [editingRecord, setEditingRecord] = useState<GameRecord | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  // 1. 初始加载配置与历史记录
-  useEffect(() => {
-    invoke("load_config")
-      .then((res: any) => res && setConfig(res))
-      .catch((err) => setLogs((prev) => [...prev, `加载配置失败: ${err}`]));
+  // ========================================
+  // 生命周期
+  // ========================================
 
+  /**
+   * 组件初始化：加载保存的配置和历史记录
+   */
+  useEffect(() => {
+    // 加载默认配置
+    invoke("load_config")
+      .then((res: any) => {
+        if (res?.proton || res?.prefix || res?.game) {
+          setConfig(res);
+        }
+      })
+      .catch((err) => {
+        addLog(`❌ 加载配置失败: ${err}`);
+      });
+
+    // 加载游戏历史
     store.get<GameRecord[]>("history").then((data) => {
-      if (data) setHistory(data);
+      if (data) {
+        setHistory(data);
+        addLog(`✅ 已加载 ${data.length} 条游戏记录`);
+      }
     });
   }, []);
 
-  // 2. 启动逻辑
+  // ========================================
+  // 事件处理器
+  // ========================================
+
+  /**
+   * 添加日志消息
+   */
+  const addLog = (message: string) => {
+    setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${message}`]);
+  };
+
+  /**
+   * 启动游戏（通过 Proton）
+   * 
+   * @param override - 可选的历史记录覆盖（从历史卡片启动）
+   */
   const handleLaunch = async (override?: GameRecord) => {
-    // 如果是从历史记录卡片点击，则使用卡片的配置；否则使用当前输入框的配置
+    // 确定要使用的配置（覆盖或当前）
     const target = override
       ? { proton: override.proton, prefix: override.prefix, game: override.game }
       : config;
 
+    // 验证必要参数
     if (!target.proton || !target.game) {
-      setLogs((prev) => [...prev, "错误: 请先选择 Proton 路径和游戏主程序"]);
+      addLog("❌ 错误: 请先选择 Proton 路径和游戏主程序");
       return;
     }
 
     setIsLoading(true);
     try {
       // 构建启动配置
-      const launchConfig: GameLaunchConfig = {
-        ...target,
-        gamescope: override?.gamescope,
-      };
+      const launchConfig: GameLaunchConfig = target;
 
-      await invoke("launch_proton", { config: launchConfig });
+      // 调用后端启动命令
+      const result = await invoke("launch_proton", { config: launchConfig });
+      addLog(`${result}`);
 
-      // 计算显示名称：自定义名 > 历史记录名 > 文件名
-      const fileName = target.game.split(/[\\/]/).pop()?.replace(".exe", "") || "Unknown Game";
+      // 计算游戏显示名称
+      const fileName = target.game.split(/[\\/]/).pop()?.replace(".exe", "") || "Unknown";
       const finalName = override ? override.name : (customName || fileName);
 
-      // 构造新记录
+      // 构造新的历史记录
       const newRecord: GameRecord = {
         ...target,
         name: finalName,
         time: Date.now(),
-        gamescope: override?.gamescope,
       };
 
-      // 更新历史（去重，置顶，限10条）
+      // 更新历史（去重、置顶、限制条数）
       const newHistory = [
         newRecord,
         ...history.filter((h) => h.game !== target.game),
-      ].slice(0, 10);
+      ].slice(0, 10); // 最多保留 10 条
 
+      // 保存到本地存储
       setHistory(newHistory);
       await store.set("history", newHistory);
       await store.save();
-      
-      // 保存当前配置为默认配置
+
+      // 保存为默认配置
       await invoke("save_config", { config: target });
 
-      setLogs((prev) => [...prev, `启动成功: ${finalName}`]);
+      // 清空自定义名称
       setCustomName("");
     } catch (err: any) {
-      setLogs((prev) => [...prev, `启动失败: ${err}`]);
+      addLog(`❌ 启动失败: ${err}`);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // 3. 编辑游戏记录
+  /**
+   * 打开编辑对话框
+   */
   const handleEditRecord = (record: GameRecord) => {
     setEditingRecord(record);
     setIsEditModalOpen(true);
   };
 
+  /**
+   * 保存编辑后的游戏记录
+   */
   const handleSaveEdit = (updatedRecord: GameRecord) => {
-    const newHistory = history.map(record => 
-      record.game === updatedRecord.game ? { ...updatedRecord, time: Date.now() } : record
+    const newHistory = history.map((record) =>
+      record.game === updatedRecord.game
+        ? { ...updatedRecord, time: Date.now() }
+        : record
     );
     setHistory(newHistory);
     store.set("history", newHistory);
     store.save();
-    setLogs((prev) => [...prev, `已更新游戏: ${updatedRecord.name}`]);
+    addLog(`✅ 已更新游戏: ${updatedRecord.name}`);
   };
 
+  /**
+   * 删除游戏记录
+   */
   const handleDeleteRecord = (recordId: string) => {
-    const recordToDelete = history.find(r => r.game === recordId);
-    const newHistory = history.filter(record => record.game !== recordId);
+    const recordToDelete = history.find((r) => r.game === recordId);
+    const newHistory = history.filter((record) => record.game !== recordId);
     setHistory(newHistory);
     store.set("history", newHistory);
     store.save();
     if (recordToDelete) {
-      setLogs((prev) => [...prev, `已删除游戏: ${recordToDelete.name}`]);
+      addLog(`✅ 已删除游戏: ${recordToDelete.name}`);
     }
   };
 
+  /**
+   * 关闭编辑对话框
+   */
   const handleCloseEditModal = () => {
     setIsEditModalOpen(false);
     setEditingRecord(null);
   };
 
-  // 4. 强制关闭功能
+  /**
+   * 强制关闭所有游戏进程
+   */
   const handleForceClose = async () => {
     try {
-      await invoke("force_close_games");
-      setLogs((prev) => [...prev, "已发送强制关闭信号"]);
+      const result = await invoke("force_close_games");
+      addLog(`${result}`);
     } catch (err: any) {
-      setLogs((prev) => [...prev, `强制关闭失败: ${err}`]);
+      addLog(`❌ 强制关闭失败: ${err}`);
     }
   };
 
+  // ========================================
+  // 渲染
+  // ========================================
+
   return (
     <div className="main-layout">
-      {/* 样式注入：解决滚动条和整体视觉设计 */}
+      {/* 全局样式 */}
       <style>{`
         .main-layout {
           height: 100vh;
@@ -149,7 +223,7 @@ function App() {
           font-family: 'Inter', system-ui, -apple-system, sans-serif;
         }
 
-        /* 纵向主滚动条美化 */
+        /* 纵向滚动条 */
         .main-layout::-webkit-scrollbar { width: 6px; }
         .main-layout::-webkit-scrollbar-track { background: transparent; }
         .main-layout::-webkit-scrollbar-thumb { background: #2e3440; border-radius: 10px; }
@@ -163,8 +237,28 @@ function App() {
           gap: 32px;
         }
 
-        .header h1 { font-size: 28px; color: #88c0d0; margin: 0; font-weight: 800; }
-        .header p { color: #4c566a; margin: 5px 0 0; font-size: 14px; }
+        .header h1 {
+          font-size: 28px;
+          color: #88c0d0;
+          margin: 0;
+          font-weight: 800;
+          letter-spacing: -0.5px;
+        }
+
+        .header p {
+          color: #4c566a;
+          margin: 8px 0 0;
+          font-size: 14px;
+        }
+
+        .section-title {
+          font-size: 12px;
+          color: #81a1c1;
+          font-weight: 600;
+          margin-bottom: 12px;
+          letter-spacing: 1px;
+          text-transform: uppercase;
+        }
 
         .history-section {
           display: flex;
@@ -172,7 +266,8 @@ function App() {
           overflow-x: auto;
           padding-bottom: 12px;
         }
-        /* 横向滚动条美化 */
+
+        /* 横向滚动条 */
         .history-section::-webkit-scrollbar { height: 4px; }
         .history-section::-webkit-scrollbar-thumb { background: #2e3440; border-radius: 10px; }
 
@@ -180,11 +275,12 @@ function App() {
           background: rgba(46, 52, 64, 0.4);
           backdrop-filter: blur(10px);
           border: 1px solid #2e3440;
-          border-radius: 16px;
+          border-radius: 20px;
           padding: 24px;
           display: flex;
           flex-direction: column;
           gap: 20px;
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
         }
 
         .input-box {
@@ -196,32 +292,115 @@ function App() {
           color: #d8dee9;
           outline: none;
           font-size: 14px;
+          transition: border-color 0.2s;
         }
-        .input-box:focus { border-color: #5e81ac; }
+
+        .input-box:focus {
+          border-color: #5e81ac;
+        }
+
+        .button-group {
+          display: flex;
+          gap: 12px;
+        }
+
+        .btn-launch {
+          flex: 1;
+          padding: 16px;
+          background-color: #5e81ac;
+          color: #fff;
+          border: none;
+          border-radius: 12px;
+          font-weight: 600;
+          font-size: 16px;
+          cursor: pointer;
+          transition: all 0.2s;
+          box-shadow: 0 4px 20px rgba(94, 129, 172, 0.3);
+        }
+
+        .btn-launch:hover:not(:disabled) {
+          background-color: #81a1c1;
+          box-shadow: 0 6px 24px rgba(94, 129, 172, 0.4);
+        }
+
+        .btn-launch:disabled {
+          background-color: #4c566a;
+          cursor: not-allowed;
+          opacity: 0.7;
+        }
+
+        .btn-close {
+          padding: 16px 24px;
+          background-color: #434c5e;
+          color: #fff;
+          border: none;
+          border-radius: 12px;
+          font-weight: 600;
+          font-size: 16px;
+          cursor: pointer;
+          transition: all 0.2s;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          box-shadow: 0 4px 15px rgba(67, 76, 94, 0.3);
+        }
+
+        .btn-close:hover:not(:disabled) {
+          background-color: #bf616a;
+          box-shadow: 0 6px 20px rgba(191, 97, 106, 0.3);
+        }
+
+        .btn-close:disabled {
+          cursor: not-allowed;
+          opacity: 0.7;
+        }
 
         .log-terminal {
           background: #000;
           border-radius: 12px;
+          border: 1px solid #1a1c25;
           padding: 15px;
-          font-family: 'Fira Code', monospace;
+          font-family: 'Fira Code', 'Monaco', monospace;
           font-size: 12px;
-          height: 140px;
+          height: 160px;
           overflow-y: auto;
           color: #a3be8c;
-          border: 1px solid #1a1c25;
           line-height: 1.6;
+        }
+
+        .log-terminal::-webkit-scrollbar { width: 6px; }
+        .log-terminal::-webkit-scrollbar-thumb { background: #2e3440; border-radius: 4px; }
+
+        .log-title {
+          color: #4c566a;
+          border-bottom: 1px solid #1a1c25;
+          margin-bottom: 8px;
+          padding-bottom: 4px;
+          font-weight: 600;
+        }
+
+        .log-item {
+          display: flex;
+          gap: 8px;
+        }
+
+        .log-prefix {
+          color: #5e81ac;
+          user-select: none;
+          flex-shrink: 0;
         }
       `}</style>
 
       <div className="container">
+        {/* 应用标题 */}
         <header className="header">
-          <h1>EasyProton</h1>
-          <p>windows游戏快速启动工具</p>
+          <h1>⚡ EasyProton</h1>
+          <p>Windows 游戏快速启动工具 • Proton Launcher</p>
         </header>
 
-        {/* 最近运行 */}
+        {/* 游戏历史记录 */}
         <section>
-          <div style={{ fontSize: '12px', color: '#81a1c1', fontWeight: 'bold', marginBottom: '12px', letterSpacing: '1px' }}>最近运行</div>
+          <div className="section-title">📋 最近运行</div>
           <div className="history-section">
             {history.length > 0 ? (
               history.map((record) => (
@@ -233,87 +412,71 @@ function App() {
                 />
               ))
             ) : (
-              <div style={{ color: '#3b4252', fontSize: '13px', padding: '10px' }}>暂无记录</div>
+              <div style={{ color: "#3b4252", fontSize: "13px", padding: "10px" }}>
+                暂无游戏记录
+              </div>
             )}
           </div>
         </section>
 
-        {/* 配置区 */}
+        {/* 配置表单 */}
         <section className="form-card">
+          {/* 自定义游戏名称 */}
           <div>
-            <label style={{ display: 'block', fontSize: '12px', color: '#81a1c1', marginBottom: '8px' }}>自定义显示名称</label>
-            <input 
-              className="input-box" 
-              placeholder="留空则自动抓取文件名" 
-              value={customName} 
-              onChange={(e) => setCustomName(e.target.value)} 
+            <label style={{ display: "block", fontSize: "12px", color: "#81a1c1", marginBottom: "8px", fontWeight: 500 }}>
+              🎮 游戏显示名称
+            </label>
+            <input
+              className="input-box"
+              type="text"
+              placeholder="留空则自动使用 EXE 文件名"
+              value={customName}
+              onChange={(e) => setCustomName(e.target.value)}
             />
           </div>
 
-          <PathSelector 
-            label="Proton 脚本路径" 
-            value={config.proton} 
-            placeholder="选择 proton 文件的绝对路径" 
-            onSelect={(p) => setConfig({ ...config, proton: p })} 
+          {/* Proton 路径选择 */}
+          <PathSelector
+            label="⚙️  Proton 脚本路径"
+            value={config.proton}
+            placeholder="选择 proton 可执行文件的路径"
+            onSelect={(p) => setConfig({ ...config, proton: p })}
           />
-          <PathSelector 
-            label="PFX 容器目录 (Compatdata)" 
-            value={config.prefix} 
-            isDirectory 
-            placeholder="选择该游戏的运行环境目录" 
-            onSelect={(p) => setConfig({ ...config, prefix: p })} 
+
+          {/* Wine 前缀选择 */}
+          <PathSelector
+            label="📁 Wine 前缀 (Compatdata)"
+            value={config.prefix}
+            isDirectory
+            placeholder="选择该游戏的 Wine 运行环境目录"
+            onSelect={(p) => setConfig({ ...config, prefix: p })}
           />
-          <PathSelector 
-            label="游戏主程序 (EXE)" 
-            value={config.game} 
-            placeholder="选择游戏的 exe 可执行文件" 
-            onSelect={(p) => setConfig({ ...config, game: p })} 
+
+          {/* 游戏 EXE 选择 */}
+          <PathSelector
+            label="🎯 游戏主程序 (EXE)"
+            value={config.game}
+            placeholder="选择游戏的 exe 可执行文件"
+            onSelect={(p) => setConfig({ ...config, game: p })}
           />
         </section>
 
-        {/* 启动按钮和强制关闭按钮 */}
-        <div style={{ display: 'flex', gap: '12px' }}>
+        {/* 操作按钮 */}
+        <div className="button-group">
           <button
+            className="btn-launch"
             onClick={() => handleLaunch()}
             disabled={isLoading}
-            style={{
-              flex: 1,
-              padding: "18px",
-              backgroundColor: isLoading ? "#4c566a" : "#5e81ac",
-              color: "#fff",
-              border: "none",
-              borderRadius: "12px",
-              fontWeight: "bold",
-              fontSize: "16px",
-              cursor: isLoading ? "not-allowed" : "pointer",
-              boxShadow: '0 4px 15px rgba(94, 129, 172, 0.3)',
-              transition: 'background 0.2s'
-            }}
           >
-            {isLoading ? "正在引导进程..." : "启动游戏"}
+            {isLoading ? "🔄 正在启动..." : "▶️  启动游戏"}
           </button>
 
           <button
+            className="btn-close"
             onClick={handleForceClose}
             disabled={isLoading}
-            style={{
-              padding: "18px 24px",
-              backgroundColor: forceCloseEnabled ? "#bf616a" : "#434c5e",
-              color: "#fff",
-              border: "none",
-              borderRadius: "12px",
-              fontWeight: "bold",
-              fontSize: "16px",
-              cursor: isLoading ? "not-allowed" : "pointer",
-              transition: 'background 0.2s',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}
-            onMouseEnter={() => setForceCloseEnabled(true)}
-            onMouseLeave={() => setForceCloseEnabled(false)}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10" />
               <line x1="15" y1="9" x2="9" y2="15" />
               <line x1="9" y1="9" x2="15" y2="15" />
@@ -322,19 +485,23 @@ function App() {
           </button>
         </div>
 
-        {/* 日志终端 */}
+        {/* 系统日志输出 */}
         <div className="log-terminal">
-          <div style={{ color: '#4c566a', borderBottom: '1px solid #1a1c25', marginBottom: '8px', paddingBottom: '4px' }}>系统日志:</div>
-          {logs.map((log, i) => (
-            <div key={i}>
-              <span style={{ color: '#5e81ac', marginRight: '8px' }}>{' > '}</span>
-              {log}
-            </div>
-          ))}
+          <div className="log-title">📋 系统日志</div>
+          {logs.length === 0 ? (
+            <div style={{ color: "#3b4252", fontSize: "12px" }}>等待命令执行...</div>
+          ) : (
+            logs.map((log, idx) => (
+              <div key={idx} className="log-item">
+                <span className="log-prefix">&gt;</span>
+                <span>{log}</span>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
-      {/* 编辑弹窗 */}
+      {/* 编辑游戏记录弹窗 */}
       <EditModal
         record={editingRecord}
         isOpen={isEditModalOpen}
