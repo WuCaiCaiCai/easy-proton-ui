@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import type { GameRecord } from "../types";
 import { PathSelector } from "./PathSelector";
+import { GamescopeConfig } from "./GamescopeConfig";
 
 interface Props {
   record: GameRecord | null;
@@ -17,7 +18,19 @@ export function EditModal({ record, isOpen, onClose, onSave, onDelete }: Props) 
   // 当记录变化时重置编辑状态
   useEffect(() => {
     if (record) {
-      setEditedRecord({ ...record });
+      // 确保gamescope配置存在
+      const gamescopeConfig = record.gamescope || {
+        enabled: false,
+        use_fsr: false,
+        fullscreen: false,
+        borderless: false,
+        vsync: false,
+      };
+      
+      setEditedRecord({ 
+        ...record, 
+        gamescope: gamescopeConfig 
+      });
       setIsDeleting(false);
     }
   }, [record]);
@@ -45,6 +58,12 @@ export function EditModal({ record, isOpen, onClose, onSave, onDelete }: Props) 
     }
   };
 
+  const handleGamescopeChange = (gamescopeConfig: typeof editedRecord.gamescope) => {
+    if (editedRecord) {
+      setEditedRecord({ ...editedRecord, gamescope: gamescopeConfig });
+    }
+  };
+
   return (
     <div 
       onClick={handleBackgroundClick}
@@ -67,7 +86,7 @@ export function EditModal({ record, isOpen, onClose, onSave, onDelete }: Props) 
           backgroundColor: "#1e2233",
           borderRadius: "20px",
           padding: "30px",
-          width: "500px",
+          width: "600px",
           maxWidth: "90vw",
           maxHeight: "85vh",
           overflowY: "auto",
@@ -271,6 +290,14 @@ export function EditModal({ record, isOpen, onClose, onSave, onDelete }: Props) 
               {editedRecord.prefix || "未设置"}
             </div>
           </div>
+
+          {/* Gamescope配置 */}
+          {editedRecord.gamescope && (
+            <GamescopeConfig
+              config={editedRecord.gamescope}
+              onChange={(config) => handleGamescopeChange(config)}
+            />
+          )}
         </div>
 
         {/* 按钮组 */}

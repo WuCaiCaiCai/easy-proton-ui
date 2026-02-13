@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { GameRecord } from "../types";
 
 interface Props {
@@ -8,6 +9,11 @@ interface Props {
 
 export function GameCard({ record, onClick, onEdit }: Props) {
   const [isHovered, setIsHovered] = useState(false);
+
+  // 检查是否有gamescope配置
+  const hasGamescope = record.gamescope?.enabled;
+  const hasFSR = record.gamescope?.use_fsr;
+  const fsrMode = record.gamescope?.fsr_mode;
 
   return (
     <div
@@ -59,6 +65,35 @@ export function GameCard({ record, onClick, onEdit }: Props) {
         </div>
       )}
 
+      {/* Gamescope状态指示器 */}
+      {hasGamescope && (
+        <div
+          style={{
+            position: "absolute",
+            top: "8px",
+            left: "8px",
+            padding: "2px 6px",
+            borderRadius: "4px",
+            backgroundColor: hasFSR ? "rgba(163, 190, 140, 0.2)" : "rgba(94, 129, 172, 0.2)",
+            border: `1px solid ${hasFSR ? "#a3be8c" : "#5e81ac"}`,
+            fontSize: "9px",
+            color: hasFSR ? "#a3be8c" : "#5e81ac",
+            fontWeight: "bold",
+            display: "flex",
+            alignItems: "center",
+            gap: "2px",
+            zIndex: 5,
+          }}
+          title={`Gamescope${hasFSR ? ` + ${fsrMode?.toUpperCase() || 'FSR'}` : ''}`}
+        >
+          <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <rect x="2" y="2" width="20" height="20" rx="4" />
+            <path d="M8 12h8M12 8v8" />
+          </svg>
+          {hasFSR ? (fsrMode?.toUpperCase() || 'FSR') : 'GS'}
+        </div>
+      )}
+
       <div
         style={{
           width: "100px",
@@ -91,6 +126,20 @@ export function GameCard({ record, onClick, onEdit }: Props) {
         {record.name}
       </div>
 
+      {/* 分辨率显示 */}
+      {hasGamescope && record.gamescope?.width && record.gamescope?.height && (
+        <div style={{
+          fontSize: "10px",
+          color: "#81a1c1",
+          marginTop: "2px",
+          backgroundColor: "rgba(46, 52, 64, 0.3)",
+          padding: "2px 6px",
+          borderRadius: "4px",
+        }}>
+          {record.gamescope.width}×{record.gamescope.height}
+        </div>
+      )}
+
       <div style={{
         fontSize: "10px",
         color: "#4c566a",
@@ -103,5 +152,3 @@ export function GameCard({ record, onClick, onEdit }: Props) {
     </div>
   );
 }
-
-import { useState } from "react";

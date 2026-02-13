@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { LazyStore } from "@tauri-apps/plugin-store";
 
-import type { AppConfig, GameRecord } from "./types";
+import type { AppConfig, GameRecord, GameLaunchConfig } from "./types";
 import { GameCard } from "./components/GameCard";
 import { EditModal } from "./components/EditModal";
 import { PathSelector } from "./components/PathSelector";
@@ -49,17 +49,24 @@ function App() {
 
     setIsLoading(true);
     try {
-      await invoke("launch_proton", { config: target, envs: "" });
+      // 构建启动配置
+      const launchConfig: GameLaunchConfig = {
+        ...target,
+        gamescope: override?.gamescope,
+      };
+
+      await invoke("launch_proton", { config: launchConfig });
 
       // 计算显示名称：自定义名 > 历史记录名 > 文件名
       const fileName = target.game.split(/[\\/]/).pop()?.replace(".exe", "") || "Unknown Game";
       const finalName = override ? override.name : (customName || fileName);
 
-      // 构造新记录（移除 icon 字段，因为 Rust 侧已不支持）
+      // 构造新记录
       const newRecord: GameRecord = {
         ...target,
         name: finalName,
         time: Date.now(),
+        gamescope: override?.gamescope,
       };
 
       // 更新历史（去重，置顶，限10条）
@@ -176,7 +183,7 @@ function App() {
           border-radius: 16px;
           padding: 24px;
           display: flex;
-          flex-direction: column;
+          flexDirection: column;
           gap: 20px;
         }
 
@@ -185,7 +192,7 @@ function App() {
           padding: 12px;
           background: #0f111a;
           border: 1px solid #3b4252;
-          border-radius: 8px;
+          borderRadius: 8px;
           color: #d8dee9;
           outline: none;
         }
@@ -193,10 +200,10 @@ function App() {
 
         .log-terminal {
           background: #000;
-          border-radius: 12px;
+          borderRadius: 12px;
           padding: 15px;
           font-family: 'Fira Code', monospace;
-          font-size: 12px;
+          fontSize: 12px;
           height: 140px;
           overflow-y: auto;
           color: #a3be8c;

@@ -1,4 +1,4 @@
-use crate::models::AppConfig;
+use crate::models::{AppConfig, GamescopeConfig, GameLaunchConfig};
 use std::fs;
 use std::path::Path;
 use std::process::Command;
@@ -6,10 +6,29 @@ use tauri::Manager;
 use sysinfo::System;
 
 #[tauri::command]
-pub async fn launch_proton(config: AppConfig) -> Result<String, String> {
+pub async fn launch_proton(config: GameLaunchConfig) -> Result<String, String> {
     let game_path = Path::new(&config.game);
     let game_dir = game_path.parent().ok_or("无法解析游戏目录")?;
 
+    // 检查gamescope是否可用
+    let gamescope_available = Command::new("which")
+        .arg("gamescope")
+        .output()
+        .map(|output| output.status.success())
+        .unwrap_or(false);
+
+    // 如果有gamescope配置且可用，则使用gamescope启动
+    if let Some(gamescope) = &config.gamescope {
+        if gamescope.enabled && gamescope_available {
+            return launch_with_gamescope(&config, gamescope, game_dir).await;
+        }
+    }
+
+    // 否则使用普通Proton启动
+    launch_with_proton(&config, game_dir).await
+}
+
+async fn launch_with_proton(config: &GameLaunchConfig, game_dir: &Path) -> Result<String, String> {
     let mut cmd = Command::new(&config.proton);
     cmd.current_dir(game_dir);
     cmd.env("STEAM_COMPAT_DATA_PATH", &config.prefix);
@@ -20,6 +39,72 @@ pub async fn launch_proton(config: AppConfig) -> Result<String, String> {
     match cmd.spawn() {
         Ok(_) => Ok("游戏已启动".into()),
         Err(e) => Err(format!("启动失败: {}", e)),
+    }
+}
+
+async fn launch_with_gamescope(
+    config: &GameLaunchConfig,
+    gamescope: &GamescopeConfig,
+    game_dir: &Path,
+) -> Result<String, String> {
+    let mut gamescope_cmd = Command::new("gamescope");
+    
+    // 添加分辨率参数
+    if let (Some(width), Some(height)) = (gamescope.width, gamescope.height) {
+        gamescope_cmd.arg("-W").arg(width.to_string());
+        gamescope_cmd.arg("-H").arg(height.to_string());
+    }
+    
+    // 添加全屏参数
+    if gamescope.fullscreen {
+        gamescope_cmd.arg("-f");
+    }
+    
+    // 添加无边框参数
+    if gamescope.borderless {
+        gamescope_cmd.arg("-b");
+    }
+    
+    // 添加垂直同步参数
+    if gamescope.vsync {
+        gamescope_cmd.arg("-o");
+    }
+    
+    // 添加FPS限制
+    if let Some(fps_limit) = gamescope.fps_limit {
+        gamescope_cmd.arg("-r").arg(fps_limit.to_string());
+    }
+    
+    // 添加FSR参数
+    if gamescope.use_fsr {
+        if let Some(fsr_mode) = &gamescope.fsr_mode {
+            match fsr_mode.as_str() {
+                "fsr1" => gamescope_cmd.arg("--fsr"),
+                "fsr2" => gamescope_cmd.arg("--fsr2"),
+                "fsr3" => gamescope_cmd.arg("--fsr3"),
+                "fsr4" => gamescope_cmd.arg("--fsr4"),
+                _ => gamescope_cmd.arg("--fsr"),
+            };
+            
+            // 添加FSR锐度参数
+            if let Some(sharpness) = gamescope.fsr_sharpness {
+                gamescope_cmd.arg("--sharpness").arg(sharpness.to_string());
+            }
+        }
+    }
+    
+    // 添加Proton命令
+    gamescope_cmd.arg("--");
+    gamescope_cmd.arg(&config.proton);
+    gamescope_cmd.current_dir(game_dir);
+    gamescope_cmd.env("STEAM_COMPAT_DATA_PATH", &config.prefix);
+    gamescope_cmd.env("STEAM_COMPAT_CLIENT_INSTALL_PATH", "~/.steam/root");
+    gamescope_cmd.env("LC_ALL", "zh_CN.UTF-8");
+    gamescope_cmd.arg("run").arg(&config.game);
+
+    match gamescope_cmd.spawn() {
+        Ok(_) => Ok("游戏已通过Gamescope启动".into()),
+        Err(e) => Err(format!("Gamescope启动失败: {}", e)),
     }
 }
 
