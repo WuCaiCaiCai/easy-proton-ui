@@ -5,6 +5,14 @@ use std::process::Command;
 use tauri::Manager;
 use sysinfo::System;
 
+/**
+ * 启动Proton游戏
+ * 
+ * 根据配置启动游戏，支持普通Proton启动和Gamescope启动两种模式
+ * 
+ * @param config - 游戏启动配置，包含Proton路径、游戏路径、前缀路径和Gamescope配置
+ * @return Result<String, String> - 成功返回启动消息，失败返回错误信息
+ */
 #[tauri::command]
 pub async fn launch_proton(config: GameLaunchConfig) -> Result<String, String> {
     let game_path = Path::new(&config.game);
@@ -28,6 +36,15 @@ pub async fn launch_proton(config: GameLaunchConfig) -> Result<String, String> {
     launch_with_proton(&config, game_dir).await
 }
 
+/**
+ * 使用普通Proton启动游戏
+ * 
+ * 构建基本的Proton启动命令，设置必要的环境变量
+ * 
+ * @param config - 游戏启动配置
+ * @param game_dir - 游戏所在目录
+ * @return Result<String, String> - 启动结果
+ */
 async fn launch_with_proton(config: &GameLaunchConfig, game_dir: &Path) -> Result<String, String> {
     let mut cmd = Command::new(&config.proton);
     cmd.current_dir(game_dir);
@@ -42,6 +59,17 @@ async fn launch_with_proton(config: &GameLaunchConfig, game_dir: &Path) -> Resul
     }
 }
 
+/**
+ * 使用Gamescope启动游戏
+ * 
+ * 构建Gamescope命令，包含分辨率、FSR、显示设置等参数
+ * Gamescope是一个Wayland合成器，提供游戏缩放和合成功能
+ * 
+ * @param config - 游戏启动配置
+ * @param gamescope - Gamescope配置
+ * @param game_dir - 游戏所在目录
+ * @return Result<String, String> - 启动结果
+ */
 async fn launch_with_gamescope(
     config: &GameLaunchConfig,
     gamescope: &GamescopeConfig,
@@ -50,50 +78,61 @@ async fn launch_with_gamescope(
     let mut gamescope_cmd = Command::new("gamescope");
     
     // 添加分辨率参数
+    // -W: 宽度, -H: 高度
     if let (Some(width), Some(height)) = (gamescope.width, gamescope.height) {
         gamescope_cmd.arg("-W").arg(width.to_string());
         gamescope_cmd.arg("-H").arg(height.to_string());
     }
     
     // 添加全屏参数
+    // -f: 全屏模式
     if gamescope.fullscreen {
         gamescope_cmd.arg("-f");
     }
     
     // 添加无边框参数
+    // -b: 无边框窗口
     if gamescope.borderless {
         gamescope_cmd.arg("-b");
     }
     
     // 添加垂直同步参数
+    // -o: 启用垂直同步
     if gamescope.vsync {
         gamescope_cmd.arg("-o");
     }
     
     // 添加FPS限制
+    // -r: FPS限制
     if let Some(fps_limit) = gamescope.fps_limit {
         gamescope_cmd.arg("-r").arg(fps_limit.to_string());
     }
     
     // 添加FSR参数
     if gamescope.use_fsr {
-        if let Some(fsr_mode) = &gamescope.fsr_mode {
-            match fsr_mode.as_str() {
-                "fsr1" => gamescope_cmd.arg("--fsr"),
-                "fsr2" => gamescope_cmd.arg("--fsr2"),
-                "fsr3" => gamescope_cmd.arg("--fsr3"),
-                "fsr4" => gamescope_cmd.arg("--fsr4"),
-                _ => gamescope_cmd.arg("--fsr"),
-            };
-            
-            // 添加FSR锐度参数
-            if let Some(sharpness) = gamescope.fsr_sharpness {
-                gamescope_cmd.arg("--sharpness").arg(sharpness.to_string());
-            }
+        // 根据FSR模式添加对应的参数
+        // --fsr: FSR 1.0
+        // --fsr2: FSR 2.0
+        // --fsr3: FSR 3.0 (包含帧生成)
+        // --fsr4: FSR 4.0 (最新版本)
+        match gamescope.fsr_mode.as_deref() {
+            Some("fsr1") => gamescope_cmd.arg("--fsr"),
+            Some("fsr2") => gamescope_cmd.arg("--fsr2"),
+            Some("fsr3") => gamescope_cmd.arg("--fsr3"),
+            Some("fsr4") => gamescope_cmd.arg("--fsr4"),
+            // 默认使用FSR1，兼容性最好
+            _ => gamescope_cmd.arg("--fsr"),
+        };
+        
+        // 添加FSR锐度参数
+        // --sharpness: FSR锐度 (0-10)
+        if let Some(sharpness) = gamescope.fsr_sharpness {
+            gamescope_cmd.arg("--sharpness").arg(sharpness.to_string());
         }
     }
     
     // 添加Proton命令
+    // --: 分隔符，后面的参数传递给子进程
     gamescope_cmd.arg("--");
     gamescope_cmd.arg(&config.proton);
     gamescope_cmd.current_dir(game_dir);
@@ -108,6 +147,15 @@ async fn launch_with_gamescope(
     }
 }
 
+/**
+ * 保存应用配置
+ * 
+ * 将应用配置保存到JSON文件中，用于持久化存储
+ * 
+ * @param handle - Tauri应用句柄
+ * @param config - 应用配置
+ * @return Result<(), String> - 保存结果
+ */
 #[tauri::command]
 pub async fn save_config(handle: tauri::AppHandle, config: AppConfig) -> Result<(), String> {
     let path = handle.path().app_config_dir().unwrap().join("config.json");
@@ -117,6 +165,14 @@ pub async fn save_config(handle: tauri::AppHandle, config: AppConfig) -> Result<
     Ok(())
 }
 
+/**
+ * 加载应用配置
+ * 
+ * 从JSON文件中加载应用配置，如果文件不存在则返回默认配置
+ * 
+ * @param handle - Tauri应用句柄
+ * @return Result<AppConfig, String> - 加载的配置或错误
+ */
 #[tauri::command]
 pub async fn load_config(handle: tauri::AppHandle) -> Result<AppConfig, String> {
     let path = handle.path().app_config_dir().unwrap().join("config.json");
@@ -127,6 +183,14 @@ pub async fn load_config(handle: tauri::AppHandle) -> Result<AppConfig, String> 
     serde_json::from_str(&content).map_err(|e| e.to_string())
 }
 
+/**
+ * 强制关闭游戏进程
+ * 
+ * 查找并关闭所有可能的游戏进程，用于处理游戏卡死或异常情况
+ * 使用sysinfo库扫描系统进程，识别游戏相关进程并关闭
+ * 
+ * @return Result<String, String> - 关闭结果信息
+ */
 #[tauri::command]
 pub async fn force_close_games() -> Result<String, String> {
     let mut system = System::new_all();

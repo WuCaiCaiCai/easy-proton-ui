@@ -6,13 +6,32 @@ interface Props {
   onChange: (config: GamescopeConfig) => void;
 }
 
+/**
+ * Gamescope配置组件
+ * 
+ * 提供完整的Gamescope设置界面，包括：
+ * - 分辨率设置
+ * - FSR超分辨率配置
+ * - 显示设置（全屏、无边框、垂直同步）
+ * - FPS限制
+ * 
+ * 注意：Gamescope需要在系统中安装才能正常使用
+ */
 export function GamescopeConfig({ config, onChange }: Props) {
   const [isExpanded, setIsExpanded] = useState(false);
 
+  /**
+   * 切换Gamescope启用状态
+   */
   const handleToggle = () => {
     onChange({ ...config, enabled: !config.enabled });
   };
 
+  /**
+   * 处理分辨率变化
+   * @param field - 要修改的字段：'width' 或 'height'
+   * @param value - 输入的值
+   */
   const handleResolutionChange = (field: 'width' | 'height', value: string) => {
     const numValue = value === '' ? undefined : parseInt(value, 10);
     onChange({ 
@@ -21,10 +40,18 @@ export function GamescopeConfig({ config, onChange }: Props) {
     });
   };
 
+  /**
+   * 处理FSR模式变化
+   * @param mode - FSR模式：'fsr1' | 'fsr2' | 'fsr3' | 'fsr4'
+   */
   const handleFsrModeChange = (mode: 'fsr1' | 'fsr2' | 'fsr3' | 'fsr4') => {
     onChange({ ...config, fsr_mode: mode });
   };
 
+  /**
+   * 处理FSR锐度变化
+   * @param value - 锐度值 (0-10)
+   */
   const handleFsrSharpnessChange = (value: string) => {
     const numValue = value === '' ? undefined : parseInt(value, 10);
     onChange({ 
@@ -33,6 +60,10 @@ export function GamescopeConfig({ config, onChange }: Props) {
     });
   };
 
+  /**
+   * 处理FPS限制变化
+   * @param value - FPS限制值
+   */
   const handleFpsLimitChange = (value: string) => {
     const numValue = value === '' ? undefined : parseInt(value, 10);
     onChange({ 
@@ -41,6 +72,11 @@ export function GamescopeConfig({ config, onChange }: Props) {
     });
   };
 
+  /**
+   * 处理布尔值设置变化
+   * @param field - 设置字段
+   * @param value - 布尔值
+   */
   const handleBooleanChange = (field: keyof GamescopeConfig, value: boolean) => {
     onChange({ ...config, [field]: value });
   };
@@ -319,6 +355,14 @@ export function GamescopeConfig({ config, onChange }: Props) {
                       </button>
                     ))}
                   </div>
+                  <div style={{
+                    fontSize: "10px",
+                    color: "#4c566a",
+                    marginTop: "4px",
+                    fontStyle: "italic",
+                  }}>
+                    FSR1: 兼容性好 | FSR2: 质量更好 | FSR3: 帧生成 | FSR4: 最新版本
+                  </div>
                 </div>
 
                 {/* FSR锐度 */}
@@ -415,6 +459,14 @@ export function GamescopeConfig({ config, onChange }: Props) {
                 <span style={{ fontSize: "13px", color: "#d8dee9" }}>垂直同步</span>
               </label>
             </div>
+            <div style={{
+              fontSize: "10px",
+              color: "#4c566a",
+              marginTop: "6px",
+              fontStyle: "italic",
+            }}>
+              全屏: 独占显示 | 无边框: 无窗口边框 | 垂直同步: 防止画面撕裂
+            </div>
           </div>
 
           {/* FPS限制 */}
@@ -451,7 +503,7 @@ export function GamescopeConfig({ config, onChange }: Props) {
               marginTop: "6px",
               fontStyle: "italic",
             }}>
-              留空则不限制FPS
+              留空则不限制FPS，建议设置为显示器刷新率
             </div>
           </div>
 
@@ -464,10 +516,12 @@ export function GamescopeConfig({ config, onChange }: Props) {
             borderRadius: "8px",
             borderLeft: "3px solid #5e81ac",
           }}>
-            <div style={{ fontWeight: 600, marginBottom: "4px" }}>提示：</div>
-            <div>• Gamescope 需要在系统中安装才能使用</div>
-            <div>• FSR 4 需要最新的 Gamescope 版本支持</div>
-            <div>• 建议为性能要求高的游戏启用 FSR</div>
+            <div style={{ fontWeight: 600, marginBottom: "4px" }}>使用提示：</div>
+            <div>• Gamescope 需要在系统中安装才能使用 (sudo apt install gamescope)</div>
+            <div>• FSR 4 需要最新的 Gamescope 版本支持 (≥ 3.14.0)</div>
+            <div>• 建议为性能要求高的游戏启用 FSR 以获得更好的帧率</div>
+            <div>• 分辨率设置会覆盖游戏内部分辨率设置</div>
+            <div>• 如果遇到启动问题，请检查gamescope版本和系统依赖</div>
           </div>
         </div>
       )}

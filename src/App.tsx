@@ -183,7 +183,7 @@ function App() {
           border-radius: 16px;
           padding: 24px;
           display: flex;
-          flexDirection: column;
+          flex-direction: column;
           gap: 20px;
         }
 
@@ -192,18 +192,19 @@ function App() {
           padding: 12px;
           background: #0f111a;
           border: 1px solid #3b4252;
-          borderRadius: 8px;
+          border-radius: 8px;
           color: #d8dee9;
           outline: none;
+          font-size: 14px;
         }
         .input-box:focus { border-color: #5e81ac; }
 
         .log-terminal {
           background: #000;
-          borderRadius: 12px;
+          border-radius: 12px;
           padding: 15px;
           font-family: 'Fira Code', monospace;
-          fontSize: 12px;
+          font-size: 12px;
           height: 140px;
           overflow-y: auto;
           color: #a3be8c;
