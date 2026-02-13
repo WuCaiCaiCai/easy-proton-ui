@@ -59,3 +59,22 @@ ea4ef57 add: gamescope
 2e65e2b chore: release v0.2.1
 d00e626 chore: 添加发布脚本
 ```
+
+## v0.3.1 (2026-02-13)
+
+### 新功能
+- 自动发布脚本
+
+### 最近提交
+```
+ca9edf1 fix: fsr & gamescope
+d1b10be chore: release v0.3.0
+ea4ef57 add: gamescope
+5682275 chore: release v0.2.2
+18d233e fix: 修复强制关闭逻辑不关闭软件本身，优化workflow配置
+6902392 fix: 移除无效的includeReleaseNotes参数
+8cb3976 fix: 确保所有版本号一致为0.2.1，准备重新构建
+3441520 ci: 优化构建流程，添加缓存清理和版本验证
+66bb646 fix: 修复版本号不一致问题，全部更新到0.2.1
+35c9289 fix: 更新tauri插件版本以解决构建错误
+```
