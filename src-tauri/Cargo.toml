@@ -1,6 +1,6 @@
 [package]
 name = "easy-proton-ui"
-version = "0.3.1"
+version = "0.4.0"
 description = "A lightweight, Rust-powered Proton launcher for Linux, specifically optimized for Galgame compatibility and simplified prefix management."
 authors = ["wucai"]
 edition = "2021"
