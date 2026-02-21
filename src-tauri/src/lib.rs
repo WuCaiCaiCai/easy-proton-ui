@@ -1,20 +1,16 @@
-// 声明模块
-pub mod models;
-pub mod commands;
+// 重构说明：集中导出 crate 模块、限制 unwrap，并将运行入口统一交给 app::launch，方便 main.rs 保持极薄。
 
-use commands::*; // 引入 commands 里所有的函数
+pub mod app;
+pub mod commands;
+pub mod domain;
+pub mod error;
+pub mod services;
+pub mod state;
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
-        .plugin(tauri_plugin_shell::init())
-        .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_store::Builder::new().build()) // 记得加上 Store 插件
-        .invoke_handler(tauri::generate_handler![
-            launch_proton,
-            save_config,
-            load_config,
-            force_close_games
-        ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+    if let Err(err) = app::launch() {
+        log::error!("EasyProtonUI failed to start: {err}");
+        panic!("error while running tauri application: {err}");
+    }
 }
