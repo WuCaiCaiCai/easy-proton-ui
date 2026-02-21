@@ -1,3 +1,146 @@
+/* 全局主题变量 */
+:root {
+  color-scheme: dark;
+  --color-body-bg: #05000f;
+  --color-body-text: #f7f3ff;
+  --color-gradient-start: #4725a3;
+  --color-gradient-end: #05000f;
+  --color-text-primary: #fdfaff;
+  --color-text-secondary: #cdbdf1;
+  --color-text-placeholder: #8f7ab8;
+  --color-accent-primary: #f7c9ff;
+  --color-accent-strong: #d6a8ff;
+  --color-panel-bg: rgba(20, 7, 45, 0.85);
+  --color-panel-border: rgba(233, 221, 255, 0.18);
+  --color-panel-shadow: 0 32px 70px rgba(5, 0, 20, 0.85);
+  --color-input-bg: rgba(7, 2, 24, 0.9);
+  --color-input-border: rgba(200, 168, 255, 0.4);
+  --color-input-text: #fdfbff;
+  --color-scrollbar-track: rgba(74, 35, 120, 0.55);
+  --color-scrollbar-thumb: rgba(217, 179, 255, 0.8);
+  --color-scrollbar-thumb-hover: rgba(255, 228, 255, 0.95);
+  --color-button-primary: #be7bff;
+  --color-button-primary-hover: #d9abff;
+  --color-button-primary-shadow: 0 18px 38px rgba(190, 123, 255, 0.45);
+  --color-button-primary-shadow-hover: 0 22px 46px rgba(217, 171, 255, 0.55);
+  --color-button-disabled: rgba(143, 110, 194, 0.5);
+  --color-button-secondary: rgba(36, 10, 70, 0.85);
+  --color-button-secondary-hover: rgba(126, 63, 179, 0.85);
+  --color-button-secondary-shadow: 0 16px 34px rgba(0, 0, 0, 0.55);
+  --color-button-secondary-shadow-hover: 0 20px 38px rgba(89, 40, 140, 0.65);
+  --color-log-bg: rgba(4, 0, 15, 0.95);
+  --color-log-border: rgba(191, 155, 240, 0.3);
+  --color-log-text: #e7fde8;
+  --color-log-prefix: #f4c6ff;
+  --color-card-bg: rgba(24, 5, 49, 0.9);
+  --color-card-border: rgba(216, 191, 255, 0.35);
+  --color-card-shadow: 0 24px 55px rgba(8, 0, 26, 0.75);
+  --color-card-shadow-hover: 0 30px 65px rgba(114, 60, 185, 0.8);
+  --color-card-icon-bg: rgba(9, 1, 26, 0.85);
+  --color-card-icon-border: rgba(212, 182, 255, 0.4);
+  --color-card-icon-stroke: #f5d8ff;
+  --color-edit-button-bg: rgba(212, 181, 255, 0.22);
+  --color-edit-button-border: rgba(212, 181, 255, 0.4);
+  --color-edit-button-hover-bg: rgba(241, 210, 255, 0.4);
+  --color-edit-button-hover-shadow: 0 12px 30px rgba(214, 168, 255, 0.5);
+  --color-modal-bg: rgba(20, 6, 45, 0.92);
+  --color-modal-border: rgba(222, 201, 255, 0.22);
+  --color-modal-section-bg: rgba(39, 13, 78, 0.75);
+  --color-modal-section-border: rgba(233, 221, 255, 0.18);
+  --color-overlay: rgba(2, 0, 10, 0.65);
+  --color-close-button: #f5e1ff;
+  --color-close-button-hover: #ff94d1;
+  --color-close-button-hover-bg: rgba(255, 148, 209, 0.25);
+  --color-icon-accent: #ffb6ff;
+  --color-danger: #ff8bb7;
+  --color-danger-muted: rgba(109, 64, 124, 0.8);
+  --color-danger-hover: #ffadcb;
+  --color-danger-bg: rgba(255, 139, 183, 0.2);
+  --color-toggle-bg: rgba(71, 31, 121, 0.7);
+  --color-toggle-hover: rgba(168, 105, 255, 0.5);
+  --color-toggle-text: #fdf5ff;
+  --color-titlebar-bg: rgba(18, 5, 40, 0.92);
+  --color-titlebar-border: rgba(216, 190, 255, 0.2);
+  --color-titlebar-text: #f9f3ff;
+  --color-titlebar-subtext: #cbb9f3;
+  --color-titlebar-icon: #fefcff;
+  --color-titlebar-btn-hover: rgba(255, 255, 255, 0.12);
+  --color-titlebar-btn-close: rgba(255, 160, 208, 0.95);
+  --color-titlebar-btn-close-hover: #ffb6d1;
+  --color-titlebar-shadow: 0 26px 60px rgba(4, 0, 16, 0.9);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --color-body-bg: #fdf7ff;
+  --color-body-text: #2f1a47;
+  --color-gradient-start: #f6edff;
+  --color-gradient-end: #fdfbff;
+  --color-text-primary: #2f1a47;
+  --color-text-secondary: #6a4f92;
+  --color-text-placeholder: #9f89be;
+  --color-accent-primary: #c084fc;
+  --color-accent-strong: #8b5cf6;
+  --color-panel-bg: rgba(255, 255, 255, 0.97);
+  --color-panel-border: rgba(189, 163, 230, 0.3);
+  --color-panel-shadow: 0 28px 55px rgba(90, 54, 137, 0.18);
+  --color-input-bg: #ffffff;
+  --color-input-border: rgba(179, 152, 222, 0.4);
+  --color-input-text: #2f1a47;
+  --color-scrollbar-track: rgba(226, 209, 255, 0.7);
+  --color-scrollbar-thumb: rgba(188, 153, 234, 0.9);
+  --color-scrollbar-thumb-hover: rgba(139, 92, 246, 0.9);
+  --color-button-primary: #8b5cf6;
+  --color-button-primary-hover: #7c3aed;
+  --color-button-primary-shadow: 0 15px 32px rgba(139, 92, 246, 0.3);
+  --color-button-primary-shadow-hover: 0 20px 40px rgba(124, 58, 237, 0.35);
+  --color-button-disabled: rgba(139, 92, 246, 0.25);
+  --color-button-secondary: rgba(247, 240, 255, 0.95);
+  --color-button-secondary-hover: rgba(233, 222, 255, 1);
+  --color-button-secondary-shadow: 0 14px 28px rgba(85, 46, 130, 0.2);
+  --color-button-secondary-shadow-hover: 0 18px 34px rgba(85, 46, 130, 0.24);
+  --color-log-bg: #f4ecff;
+  --color-log-border: rgba(175, 143, 218, 0.35);
+  --color-log-text: #4b5563;
+  --color-log-prefix: #8b5cf6;
+  --color-card-bg: rgba(255, 255, 255, 0.98);
+  --color-card-border: rgba(186, 158, 227, 0.35);
+  --color-card-shadow: 0 18px 40px rgba(77, 45, 117, 0.18);
+  --color-card-shadow-hover: 0 24px 48px rgba(77, 45, 117, 0.22);
+  --color-card-icon-bg: rgba(243, 233, 255, 0.92);
+  --color-card-icon-border: rgba(194, 168, 233, 0.45);
+  --color-card-icon-stroke: #8b5cf6;
+  --color-edit-button-bg: rgba(139, 92, 246, 0.14);
+  --color-edit-button-border: rgba(139, 92, 246, 0.22);
+  --color-edit-button-hover-bg: rgba(139, 92, 246, 0.24);
+  --color-edit-button-hover-shadow: 0 12px 26px rgba(139, 92, 246, 0.25);
+  --color-modal-bg: #ffffff;
+  --color-modal-border: rgba(189, 163, 230, 0.3);
+  --color-modal-section-bg: rgba(247, 240, 255, 0.95);
+  --color-modal-section-border: rgba(199, 173, 235, 0.3);
+  --color-overlay: rgba(38, 10, 70, 0.4);
+  --color-close-button: #6a4f92;
+  --color-close-button-hover: #c026d3;
+  --color-close-button-hover-bg: rgba(192, 38, 211, 0.15);
+  --color-icon-accent: #c026d3;
+  --color-danger: #c026d3;
+  --color-danger-muted: rgba(236, 223, 255, 0.95);
+  --color-danger-hover: #9d174d;
+  --color-danger-bg: rgba(255, 149, 199, 0.16);
+  --color-toggle-bg: rgba(237, 226, 255, 0.9);
+  --color-toggle-hover: rgba(196, 181, 253, 0.85);
+  --color-toggle-text: #4c1d95;
+  --color-titlebar-bg: rgba(250, 244, 255, 0.92);
+  --color-titlebar-border: rgba(182, 154, 226, 0.35);
+  --color-titlebar-text: #2f1a47;
+  --color-titlebar-subtext: #7f5fab;
+  --color-titlebar-icon: #2f1a47;
+  --color-titlebar-btn-hover: rgba(139, 92, 246, 0.15);
+  --color-titlebar-btn-close: rgba(225, 29, 72, 0.9);
+  --color-titlebar-btn-close-hover: rgba(190, 18, 60, 0.95);
+  --color-titlebar-shadow: 0 24px 50px rgba(139, 92, 246, 0.2);
+}
+
 /* 全局样式重置和KDE兼容性修复 */
 * {
   margin: 0;
@@ -5,23 +148,34 @@
   box-sizing: border-box;
 }
 
+html,
 body {
   margin: 0;
   padding: 0;
+  width: 100vw;
+  height: 100vh;
   overflow: hidden;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: transparent;
+  background-color: var(--color-body-bg);
+  color: var(--color-body-text);
 }
 
 /* KDE环境下的特殊修复 */
 @supports (-webkit-touch-callout: none) {
-  /* WebKit/Blink浏览器修复 */
   body {
-    background: #0f111a;
+    background: var(--color-body-bg);
   }
 }
 
@@ -32,22 +186,25 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(46, 52, 64, 0.3);
+  background: var(--color-scrollbar-track);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #4c566a;
+  background: var(--color-scrollbar-thumb);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #5e81ac;
+  background: var(--color-scrollbar-thumb-hover);
 }
 
 /* 输入框和按钮的焦点样式 */
-input:focus, button:focus, textarea:focus, select:focus {
-  outline: 2px solid #5e81ac;
+input:focus,
+button:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid var(--color-button-primary);
   outline-offset: 2px;
 }
 

@@ -8,9 +8,10 @@
  * - 配置持久化
  */
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { LazyStore } from "@tauri-apps/plugin-store";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 
 import type { AppConfig, GameRecord, GameLaunchConfig } from "./types";
 import { GameCard } from "./components/GameCard";
@@ -19,6 +20,21 @@ import { PathSelector } from "./components/PathSelector";
 
 // 持久化存储（JSON 文件）
 const store = new LazyStore(".proton_history.json");
+const THEME_STORAGE_KEY = "easy-proton-theme";
+type ThemeMode = "light" | "dark";
+
+const getInitialTheme = (): ThemeMode => {
+  if (typeof window !== "undefined") {
+    const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
+    if (stored === "light" || stored === "dark") {
+      return stored;
+    }
+    if (window.matchMedia("(prefers-color-scheme: light)").matches) {
+      return "light";
+    }
+  }
+  return "dark";
+};
 
 /**
  * 应用主组件
@@ -46,6 +62,9 @@ function App() {
   const [customName, setCustomName] = useState("");
   const [editingRecord, setEditingRecord] = useState<GameRecord | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [theme, setTheme] = useState<ThemeMode>(() => getInitialTheme());
+  const [hasWindowControls, setHasWindowControls] = useState(false);
+  const [isMaximized, setIsMaximized] = useState(false);
 
   // ========================================
   // 生命周期
@@ -73,6 +92,48 @@ function App() {
         addLog(`✅ 已加载 ${data.length} 条游戏记录`);
       }
     });
+  }, []);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    root.setAttribute("data-theme", theme);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+    }
+  }, [theme]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    const hasTauri = Boolean((window as any).__TAURI_INTERNALS__);
+    setHasWindowControls(hasTauri);
+    if (!hasTauri) {
+      return;
+    }
+    let unlisten: (() => void) | undefined;
+    const windowHandle = getCurrentWindow();
+    windowHandle
+      .isMaximized()
+      .then(setIsMaximized)
+      .catch(() => {});
+    windowHandle
+      .onResized(async () => {
+        try {
+          const maximized = await windowHandle.isMaximized();
+          setIsMaximized(maximized);
+        } catch {
+          // ignore
+        }
+      })
+      .then((fn: () => void) => {
+        unlisten = fn;
+      })
+      .catch(() => {});
+
+    return () => {
+      unlisten?.();
+    };
   }, []);
 
   // ========================================
@@ -203,9 +264,53 @@ function App() {
     }
   };
 
+  /**
+   * 自定义窗口控制
+   */
+  const handleMinimizeWindow = async () => {
+    if (!hasWindowControls) return;
+    try {
+      await getCurrentWindow().minimize();
+    } catch (err) {
+      addLog(`❌ 窗口操作失败: ${err}`);
+    }
+  };
+
+  const handleToggleMaximize = async () => {
+    if (!hasWindowControls) return;
+    try {
+      const windowHandle = getCurrentWindow();
+      await windowHandle.toggleMaximize();
+      const maximized = await windowHandle.isMaximized();
+      setIsMaximized(maximized);
+    } catch (err) {
+      addLog(`❌ 窗口操作失败: ${err}`);
+    }
+  };
+
+  const handleCloseWindow = async () => {
+    if (!hasWindowControls) return;
+    try {
+      await getCurrentWindow().close();
+    } catch (err) {
+      addLog(`❌ 窗口操作失败: ${err}`);
+    }
+  };
+
+  /**
+   * 主题切换
+   */
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  };
+
   // ========================================
   // 渲染
   // ========================================
+
+  const themeIcon = theme === "dark" ? "🌙" : "☀️";
+  const nextThemeLabel = theme === "dark" ? "浅色模式" : "深色模式";
+  const windowTitle = isMaximized ? "EasyProton · 全屏" : "EasyProton";
 
   return (
     <div className="main-layout">
@@ -214,8 +319,8 @@ function App() {
         .main-layout {
           height: 100vh;
           width: 100vw;
-          background: radial-gradient(circle at top right, #1a1c25, #0f111a);
-          color: #eceff4;
+          background: radial-gradient(circle at top right, var(--color-gradient-start), var(--color-gradient-end));
+          color: var(--color-text-primary);
           overflow-y: auto;
           overflow-x: hidden;
           padding: 30px;
@@ -223,11 +328,118 @@ function App() {
           font-family: 'Inter', system-ui, -apple-system, sans-serif;
         }
 
-        /* 纵向滚动条 */
+        .window-frame {
+          width: min(980px, calc(100% - 32px));
+          margin: 0 auto 28px;
+          padding: 12px 18px;
+          border-radius: 22px;
+          background: var(--color-titlebar-bg);
+          border: 1px solid var(--color-titlebar-border);
+          color: var(--color-titlebar-text);
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 24px;
+          -webkit-app-region: drag;
+          box-shadow: var(--color-titlebar-shadow);
+          backdrop-filter: blur(24px);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .window-frame::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          background: radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.15), transparent 55%);
+          mix-blend-mode: screen;
+        }
+
+        .window-meta {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          font-weight: 600;
+          letter-spacing: 0.4px;
+        }
+
+        .window-pill {
+          width: 44px;
+          height: 44px;
+          border-radius: 14px;
+          background: linear-gradient(135deg, #b16bff, #ffb6ff);
+          box-shadow: 0 12px 30px rgba(177, 107, 255, 0.4);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          font-size: 13px;
+          color: #1c082b;
+        }
+
+        .window-title-stack {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          z-index: 1;
+        }
+
+        .window-title-text {
+          font-size: 16px;
+          letter-spacing: 0.6px;
+        }
+
+        .window-title-sub {
+          font-size: 11px;
+          color: var(--color-titlebar-subtext);
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+        }
+
+        .window-actions {
+          display: flex;
+          gap: 10px;
+        }
+
+        .window-btn {
+          width: 38px;
+          height: 32px;
+          border-radius: 10px;
+          background: transparent;
+          border: 1px solid transparent;
+          color: var(--color-titlebar-icon);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+          -webkit-app-region: no-drag;
+        }
+
+        .window-btn svg {
+          pointer-events: none;
+        }
+
+        .window-btn:hover {
+          background: var(--color-titlebar-btn-hover);
+          border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .window-btn.close {
+          color: var(--color-titlebar-btn-close);
+        }
+
+        .window-btn.close:hover {
+          background: var(--color-titlebar-btn-hover);
+          color: var(--color-titlebar-btn-close-hover);
+          border-color: rgba(255, 255, 255, 0.2);
+        }
+
         .main-layout::-webkit-scrollbar { width: 6px; }
         .main-layout::-webkit-scrollbar-track { background: transparent; }
-        .main-layout::-webkit-scrollbar-thumb { background: #2e3440; border-radius: 10px; }
-        .main-layout::-webkit-scrollbar-thumb:hover { background: #434c5e; }
+        .main-layout::-webkit-scrollbar-thumb { background: var(--color-scrollbar-thumb); border-radius: 10px; }
+        .main-layout::-webkit-scrollbar-thumb:hover { background: var(--color-scrollbar-thumb-hover); }
 
         .container {
           max-width: 800px;
@@ -237,23 +449,46 @@ function App() {
           gap: 32px;
         }
 
+        .header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 16px;
+          flex-wrap: wrap;
+        }
+
         .header h1 {
           font-size: 28px;
-          color: #88c0d0;
+          color: var(--color-accent-primary);
           margin: 0;
           font-weight: 800;
           letter-spacing: -0.5px;
         }
 
+        .status-chip {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 4px 10px;
+          border-radius: 999px;
+          font-size: 11px;
+          letter-spacing: 1.2px;
+          text-transform: uppercase;
+          color: var(--color-text-primary);
+          background: linear-gradient(120deg, rgba(255, 255, 255, 0.15), transparent);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          margin-bottom: 12px;
+        }
+
         .header p {
-          color: #4c566a;
+          color: var(--color-text-secondary);
           margin: 8px 0 0;
           font-size: 14px;
         }
 
         .section-title {
           font-size: 12px;
-          color: #81a1c1;
+          color: var(--color-accent-strong);
           font-weight: 600;
           margin-bottom: 12px;
           letter-spacing: 1px;
@@ -267,36 +502,46 @@ function App() {
           padding-bottom: 12px;
         }
 
-        /* 横向滚动条 */
         .history-section::-webkit-scrollbar { height: 4px; }
-        .history-section::-webkit-scrollbar-thumb { background: #2e3440; border-radius: 10px; }
+        .history-section::-webkit-scrollbar-thumb { background: var(--color-scrollbar-thumb); border-radius: 10px; }
+        .history-section::-webkit-scrollbar-thumb:hover { background: var(--color-scrollbar-thumb-hover); }
+
+        .history-empty {
+          color: var(--color-text-placeholder);
+          font-size: 13px;
+          padding: 10px;
+        }
 
         .form-card {
-          background: rgba(46, 52, 64, 0.4);
+          background: var(--color-panel-bg);
           backdrop-filter: blur(10px);
-          border: 1px solid #2e3440;
+          border: 1px solid var(--color-panel-border);
           border-radius: 20px;
           padding: 24px;
           display: flex;
           flex-direction: column;
           gap: 20px;
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+          box-shadow: var(--color-panel-shadow);
         }
 
         .input-box {
           width: 100%;
           padding: 12px;
-          background: #0f111a;
-          border: 1px solid #3b4252;
+          background: var(--color-input-bg);
+          border: 1px solid var(--color-input-border);
           border-radius: 8px;
-          color: #d8dee9;
+          color: var(--color-input-text);
           outline: none;
           font-size: 14px;
           transition: border-color 0.2s;
         }
 
+        .input-box::placeholder {
+          color: var(--color-text-placeholder);
+        }
+
         .input-box:focus {
-          border-color: #5e81ac;
+          border-color: var(--color-button-primary);
         }
 
         .button-group {
@@ -307,7 +552,7 @@ function App() {
         .btn-launch {
           flex: 1;
           padding: 16px;
-          background-color: #5e81ac;
+          background-color: var(--color-button-primary);
           color: #fff;
           border: none;
           border-radius: 12px;
@@ -315,24 +560,24 @@ function App() {
           font-size: 16px;
           cursor: pointer;
           transition: all 0.2s;
-          box-shadow: 0 4px 20px rgba(94, 129, 172, 0.3);
+          box-shadow: var(--color-button-primary-shadow);
         }
 
         .btn-launch:hover:not(:disabled) {
-          background-color: #81a1c1;
-          box-shadow: 0 6px 24px rgba(94, 129, 172, 0.4);
+          background-color: var(--color-button-primary-hover);
+          box-shadow: var(--color-button-primary-shadow-hover);
         }
 
         .btn-launch:disabled {
-          background-color: #4c566a;
+          background-color: var(--color-button-disabled);
           cursor: not-allowed;
           opacity: 0.7;
         }
 
         .btn-close {
           padding: 16px 24px;
-          background-color: #434c5e;
-          color: #fff;
+          background-color: var(--color-button-secondary);
+          color: var(--color-text-primary);
           border: none;
           border-radius: 12px;
           font-weight: 600;
@@ -342,12 +587,13 @@ function App() {
           display: flex;
           align-items: center;
           gap: 8px;
-          box-shadow: 0 4px 15px rgba(67, 76, 94, 0.3);
+          box-shadow: var(--color-button-secondary-shadow);
         }
 
         .btn-close:hover:not(:disabled) {
-          background-color: #bf616a;
-          box-shadow: 0 6px 20px rgba(191, 97, 106, 0.3);
+          background-color: var(--color-button-secondary-hover);
+          box-shadow: var(--color-button-secondary-shadow-hover);
+          color: #fff;
         }
 
         .btn-close:disabled {
@@ -356,24 +602,24 @@ function App() {
         }
 
         .log-terminal {
-          background: #000;
+          background: var(--color-log-bg);
           border-radius: 12px;
-          border: 1px solid #1a1c25;
+          border: 1px solid var(--color-log-border);
           padding: 15px;
           font-family: 'Fira Code', 'Monaco', monospace;
           font-size: 12px;
           height: 160px;
           overflow-y: auto;
-          color: #a3be8c;
+          color: var(--color-log-text);
           line-height: 1.6;
         }
 
         .log-terminal::-webkit-scrollbar { width: 6px; }
-        .log-terminal::-webkit-scrollbar-thumb { background: #2e3440; border-radius: 4px; }
+        .log-terminal::-webkit-scrollbar-thumb { background: var(--color-scrollbar-thumb); border-radius: 4px; }
 
         .log-title {
-          color: #4c566a;
-          border-bottom: 1px solid #1a1c25;
+          color: var(--color-text-secondary);
+          border-bottom: 1px solid var(--color-log-border);
           margin-bottom: 8px;
           padding-bottom: 4px;
           font-weight: 600;
@@ -382,20 +628,105 @@ function App() {
         .log-item {
           display: flex;
           gap: 8px;
+          color: var(--color-text-primary);
         }
 
         .log-prefix {
-          color: #5e81ac;
+          color: var(--color-log-prefix);
           user-select: none;
           flex-shrink: 0;
         }
+
+        .theme-toggle {
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          background: linear-gradient(120deg, rgba(255, 255, 255, 0.15), transparent);
+          color: var(--color-toggle-text);
+          border-radius: 999px;
+          padding: 8px 16px;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          cursor: pointer;
+          font-weight: 600;
+          font-size: 14px;
+          transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .theme-toggle span {
+          font-size: 18px;
+        }
+
+        .theme-toggle:hover {
+          background: linear-gradient(120deg, var(--color-toggle-hover), transparent);
+          transform: translateY(-1px);
+          box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25);
+        }
       `}</style>
+
+      {hasWindowControls && (
+        <div className="window-frame" data-tauri-drag-region>
+          <div className="window-meta" data-tauri-drag-region>
+            <div className="window-pill" aria-hidden="true">EP</div>
+            <div className="window-title-stack">
+              <span className="window-title-text">{windowTitle}</span>
+              <span className="window-title-sub">Nebula Surface · Custom Shell</span>
+            </div>
+          </div>
+          <div className="window-actions">
+            <button
+              type="button"
+              className="window-btn"
+              onClick={handleMinimizeWindow}
+              aria-label="最小化窗口"
+            >
+              <svg width="12" height="12" viewBox="0 0 12 12" stroke="currentColor" strokeWidth="1.6">
+                <line x1="2" y1="9" x2="10" y2="9" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              className="window-btn"
+              onClick={handleToggleMaximize}
+              aria-label={isMaximized ? "还原窗口" : "最大化窗口"}
+            >
+              <svg width="12" height="12" viewBox="0 0 12 12" stroke="currentColor" strokeWidth="1.4" fill="none">
+                <rect x="3" y="3" width="6" height="6" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              className="window-btn close"
+              onClick={handleCloseWindow}
+              aria-label="关闭窗口"
+            >
+              <svg width="12" height="12" viewBox="0 0 12 12" stroke="currentColor" strokeWidth="1.4">
+                <line x1="3" y1="3" x2="9" y2="9" />
+                <line x1="9" y1="3" x2="3" y2="9" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="container">
         {/* 应用标题 */}
         <header className="header">
-          <h1>⚡ EasyProton</h1>
-          <p>Windows 游戏快速启动工具 • Proton Launcher</p>
+          <div>
+            <div className="status-chip">Nebula Deck</div>
+            <h1>⚡ EasyProton</h1>
+            <p>Windows 游戏快速启动工具 • Proton Launcher</p>
+          </div>
+          <button
+            type="button"
+            className="theme-toggle"
+            onClick={toggleTheme}
+            aria-label={`切换到${nextThemeLabel}`}
+            title={`切换到${nextThemeLabel}`}
+          >
+            <span>{themeIcon}</span>
+            切换到{nextThemeLabel}
+          </button>
         </header>
 
         {/* 游戏历史记录 */}
@@ -412,7 +743,7 @@ function App() {
                 />
               ))
             ) : (
-              <div style={{ color: "#3b4252", fontSize: "13px", padding: "10px" }}>
+              <div style={{ color: "var(--color-text-placeholder)", fontSize: "13px", padding: "10px" }}>
                 暂无游戏记录
               </div>
             )}
@@ -423,7 +754,7 @@ function App() {
         <section className="form-card">
           {/* 自定义游戏名称 */}
           <div>
-            <label style={{ display: "block", fontSize: "12px", color: "#81a1c1", marginBottom: "8px", fontWeight: 500 }}>
+            <label style={{ display: "block", fontSize: "12px", color: "var(--color-accent-strong)", marginBottom: "8px", fontWeight: 500 }}>
               🎮 游戏显示名称
             </label>
             <input
@@ -489,7 +820,7 @@ function App() {
         <div className="log-terminal">
           <div className="log-title">📋 系统日志</div>
           {logs.length === 0 ? (
-            <div style={{ color: "#3b4252", fontSize: "12px" }}>等待命令执行...</div>
+            <div style={{ color: "var(--color-text-secondary)", fontSize: "12px" }}>等待命令执行...</div>
           ) : (
             logs.map((log, idx) => (
               <div key={idx} className="log-item">

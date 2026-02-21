@@ -33,17 +33,19 @@ export function GameCard({ record, onClick, onEdit }: Props) {
       style={{
         minWidth: "140px",
         padding: "15px",
-        backgroundColor: "#1e2233",
+        backgroundColor: "var(--color-card-bg)",
+        backgroundImage: "linear-gradient(140deg, rgba(255, 255, 255, 0.06), transparent)",
         borderRadius: "14px",
         cursor: "pointer",
-        border: "1px solid #2e3440",
+        border: "1px solid var(--color-card-border)",
         transition: "all 0.2s ease-in-out",
         transform: isHovered ? "translateY(-4px)" : "translateY(0)",
-        boxShadow: isHovered ? "0 8px 24px rgba(0, 0, 0, 0.3)" : "0 4px 12px rgba(0, 0, 0, 0.2)",
+        boxShadow: isHovered ? "var(--color-card-shadow-hover)" : "var(--color-card-shadow)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         position: "relative",
+        backdropFilter: "blur(6px)",
       }}
     >
       {/* 编辑按钮（Hover 时显示） */}
@@ -60,8 +62,8 @@ export function GameCard({ record, onClick, onEdit }: Props) {
             width: "28px",
             height: "28px",
             borderRadius: "50%",
-            backgroundColor: "rgba(94, 129, 172, 0.9)",
-            border: "1px solid #5e81ac",
+            backgroundColor: "var(--color-edit-button-bg)",
+            border: "1px solid var(--color-edit-button-border)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -69,18 +71,19 @@ export function GameCard({ record, onClick, onEdit }: Props) {
             zIndex: 10,
             transition: "all 0.2s",
             padding: "0",
+            color: "var(--color-text-primary)",
           }}
           title="编辑游戏"
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(81, 161, 193, 0.95)";
-            e.currentTarget.style.boxShadow = "0 4px 12px rgba(94, 129, 172, 0.4)";
+            e.currentTarget.style.backgroundColor = "var(--color-edit-button-hover-bg)";
+            e.currentTarget.style.boxShadow = "var(--color-edit-button-hover-shadow)";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(94, 129, 172, 0.9)";
+            e.currentTarget.style.backgroundColor = "var(--color-edit-button-bg)";
             e.currentTarget.style.boxShadow = "none";
           }}
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" color="#fff">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
           </svg>
@@ -93,15 +96,15 @@ export function GameCard({ record, onClick, onEdit }: Props) {
           width: "100px",
           height: "100px",
           marginBottom: "12px",
-          backgroundColor: "#0f111a",
+          backgroundColor: "var(--color-card-icon-bg)",
           borderRadius: "10px",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          border: "1px solid #2e3440",
+          border: "1px solid var(--color-card-icon-border)",
         }}
       >
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#4c566a" strokeWidth="1.5">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--color-card-icon-stroke)" strokeWidth="1.5">
           <rect x="2" y="6" width="20" height="12" rx="2" />
           <path d="M6 12h4M8 10v4M15 13v.01M18 11v.01" />
         </svg>
@@ -112,7 +115,7 @@ export function GameCard({ record, onClick, onEdit }: Props) {
         style={{
           fontSize: "13px",
           fontWeight: "600",
-          color: "#d8dee9",
+          color: "var(--color-text-primary)",
           width: "100%",
           textAlign: "center",
           overflow: "hidden",
@@ -129,7 +132,7 @@ export function GameCard({ record, onClick, onEdit }: Props) {
       <div
         style={{
           fontSize: "11px",
-          color: "#4c566a",
+          color: "var(--color-text-secondary)",
           width: "100%",
           textAlign: "center",
         }}
@@ -139,4 +142,3 @@ export function GameCard({ record, onClick, onEdit }: Props) {
     </div>
   );
 }
-

@@ -95,7 +95,7 @@ export function EditModal({ record, isOpen, onClose, onSave, onDelete }: Props) 
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.7)",
+        backgroundColor: "var(--color-overlay)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -106,18 +106,21 @@ export function EditModal({ record, isOpen, onClose, onSave, onDelete }: Props) 
       {/* 对话框容器 */}
       <div
         style={{
-          backgroundColor: "#1e2233",
+          backgroundColor: "var(--color-modal-bg)",
+          backgroundImage: "linear-gradient(145deg, rgba(255, 255, 255, 0.04), transparent)",
           borderRadius: "20px",
           padding: "30px",
           width: "500px",
           maxWidth: "90vw",
           maxHeight: "85vh",
           overflowY: "auto",
-          border: "2px solid #2e3440",
-          boxShadow: "0 20px 60px rgba(0, 0, 0, 0.5)",
+          border: "2px solid var(--color-modal-border)",
+          boxShadow: "0 20px 60px rgba(0, 0, 0, 0.35)",
           display: "flex",
           flexDirection: "column",
           gap: "24px",
+          color: "var(--color-text-primary)",
+          backdropFilter: "blur(18px)",
         }}
       >
         {/* 标题栏 */}
@@ -126,14 +129,14 @@ export function EditModal({ record, isOpen, onClose, onSave, onDelete }: Props) 
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            borderBottom: "1px solid #2e3440",
+            borderBottom: "1px solid var(--color-modal-border)",
             paddingBottom: "16px",
           }}
         >
           <h2
             style={{
               margin: 0,
-              color: "#88c0d0",
+              color: "var(--color-accent-primary)",
               fontSize: "20px",
               fontWeight: 700,
             }}
@@ -145,7 +148,7 @@ export function EditModal({ record, isOpen, onClose, onSave, onDelete }: Props) 
             style={{
               background: "none",
               border: "none",
-              color: "#4c566a",
+              color: "var(--color-close-button)",
               fontSize: "28px",
               cursor: "pointer",
               padding: "0",
@@ -158,11 +161,11 @@ export function EditModal({ record, isOpen, onClose, onSave, onDelete }: Props) 
               transition: "all 0.2s",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.color = "#bf616a";
-              e.currentTarget.style.backgroundColor = "rgba(191, 97, 106, 0.1)";
+              e.currentTarget.style.color = "var(--color-close-button-hover)";
+              e.currentTarget.style.backgroundColor = "var(--color-close-button-hover-bg)";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.color = "#4c566a";
+              e.currentTarget.style.color = "var(--color-close-button)";
               e.currentTarget.style.backgroundColor = "transparent";
             }}
           >
@@ -173,20 +176,20 @@ export function EditModal({ record, isOpen, onClose, onSave, onDelete }: Props) 
         {/* 游戏信息预览 */}
         <div
           style={{
-            backgroundColor: "rgba(15, 17, 26, 0.4)",
+            backgroundColor: "var(--color-modal-section-bg)",
             borderRadius: "12px",
             padding: "16px",
-            border: "1px solid #2e3440",
+            border: "1px solid var(--color-modal-section-border)",
           }}
         >
-          <div style={{ fontSize: "12px", color: "#81a1c1", marginBottom: "8px", fontWeight: 500 }}>
+          <div style={{ fontSize: "12px", color: "var(--color-accent-strong)", marginBottom: "8px", fontWeight: 500 }}>
             当前游戏
           </div>
           <div
             style={{
               fontSize: "16px",
               fontWeight: 600,
-              color: "#d8dee9",
+              color: "var(--color-text-primary)",
               display: "flex",
               alignItems: "center",
               gap: "12px",
@@ -196,7 +199,7 @@ export function EditModal({ record, isOpen, onClose, onSave, onDelete }: Props) 
               style={{
                 width: "40px",
                 height: "40px",
-                backgroundColor: "#0f111a",
+                backgroundColor: "var(--color-card-icon-bg)",
                 borderRadius: "8px",
                 display: "flex",
                 alignItems: "center",
@@ -204,7 +207,7 @@ export function EditModal({ record, isOpen, onClose, onSave, onDelete }: Props) 
                 flexShrink: 0,
               }}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#81a1c1" strokeWidth="2">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-icon-accent)" strokeWidth="2">
                 <polyline points="21 8 21 21 3 21 3 8"></polyline>
                 <line x1="1" y1="3" x2="23" y2="3"></line>
                 <path d="M10 12l4 0M12 9l0 6"></path>
@@ -212,7 +215,7 @@ export function EditModal({ record, isOpen, onClose, onSave, onDelete }: Props) 
             </div>
             <div>
               <div>{record.name}</div>
-              <div style={{ fontSize: "12px", color: "#4c566a", marginTop: "4px" }}>
+              <div style={{ fontSize: "12px", color: "var(--color-text-secondary)", marginTop: "4px" }}>
                 {record.game.split(/[\\/]/).pop()}
               </div>
             </div>
@@ -234,7 +237,7 @@ export function EditModal({ record, isOpen, onClose, onSave, onDelete }: Props) 
                 display: "block",
                 fontSize: "13px",
                 fontWeight: 600,
-                color: "#81a1c1",
+                color: "var(--color-accent-strong)",
                 marginBottom: "8px",
               }}
             >
@@ -249,16 +252,16 @@ export function EditModal({ record, isOpen, onClose, onSave, onDelete }: Props) 
                 width: "100%",
                 padding: "12px",
                 borderRadius: "8px",
-                border: "1px solid #3b4252",
-                backgroundColor: "#0f111a",
-                color: "#d8dee9",
+                border: "1px solid var(--color-input-border)",
+                backgroundColor: "var(--color-input-bg)",
+                color: "var(--color-input-text)",
                 fontSize: "14px",
                 outline: "none",
                 transition: "border-color 0.2s",
                 boxSizing: "border-box",
               }}
-              onFocus={(e) => (e.target.style.borderColor = "#5e81ac")}
-              onBlur={(e) => (e.target.style.borderColor = "#3b4252")}
+              onFocus={(e) => (e.currentTarget.style.borderColor = "var(--color-button-primary)")}
+              onBlur={(e) => (e.currentTarget.style.borderColor = "var(--color-input-border)")}
             />
           </div>
 
@@ -277,7 +280,7 @@ export function EditModal({ record, isOpen, onClose, onSave, onDelete }: Props) 
                 display: "block",
                 fontSize: "13px",
                 fontWeight: 600,
-                color: "#81a1c1",
+                color: "var(--color-accent-strong)",
                 marginBottom: "8px",
               }}
             >
@@ -288,9 +291,9 @@ export function EditModal({ record, isOpen, onClose, onSave, onDelete }: Props) 
                 width: "100%",
                 padding: "12px",
                 borderRadius: "8px",
-                border: "1px solid #2e3440",
-                backgroundColor: "#0f111a",
-                color: "#4c566a",
+                border: "1px solid var(--color-modal-border)",
+                backgroundColor: "var(--color-card-icon-bg)",
+                color: "var(--color-text-secondary)",
                 fontSize: "13px",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
@@ -309,7 +312,7 @@ export function EditModal({ record, isOpen, onClose, onSave, onDelete }: Props) 
                 display: "block",
                 fontSize: "13px",
                 fontWeight: 600,
-                color: "#81a1c1",
+                color: "var(--color-accent-strong)",
                 marginBottom: "8px",
               }}
             >
@@ -320,9 +323,9 @@ export function EditModal({ record, isOpen, onClose, onSave, onDelete }: Props) 
                 width: "100%",
                 padding: "12px",
                 borderRadius: "8px",
-                border: "1px solid #2e3440",
-                backgroundColor: "#0f111a",
-                color: "#4c566a",
+                border: "1px solid var(--color-modal-border)",
+                backgroundColor: "var(--color-card-icon-bg)",
+                color: "var(--color-text-secondary)",
                 fontSize: "13px",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
@@ -341,7 +344,7 @@ export function EditModal({ record, isOpen, onClose, onSave, onDelete }: Props) 
             display: "flex",
             gap: "12px",
             paddingTop: "16px",
-            borderTop: "1px solid #2e3440",
+            borderTop: "1px solid var(--color-modal-border)",
           }}
         >
           {/* 保存按钮 */}
@@ -350,7 +353,7 @@ export function EditModal({ record, isOpen, onClose, onSave, onDelete }: Props) 
             style={{
               flex: 1,
               padding: "14px",
-              backgroundColor: "#5e81ac",
+              backgroundColor: "var(--color-button-primary)",
               color: "#fff",
               border: "none",
               borderRadius: "10px",
@@ -358,15 +361,15 @@ export function EditModal({ record, isOpen, onClose, onSave, onDelete }: Props) 
               fontWeight: 600,
               cursor: "pointer",
               transition: "all 0.2s",
-              boxShadow: "0 4px 12px rgba(94, 129, 172, 0.3)",
+              boxShadow: "var(--color-button-primary-shadow)",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#81a1c1";
-              e.currentTarget.style.boxShadow = "0 6px 16px rgba(94, 129, 172, 0.4)";
+              e.currentTarget.style.backgroundColor = "var(--color-button-primary-hover)";
+              e.currentTarget.style.boxShadow = "var(--color-button-primary-shadow-hover)";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "#5e81ac";
-              e.currentTarget.style.boxShadow = "0 4px 12px rgba(94, 129, 172, 0.3)";
+              e.currentTarget.style.backgroundColor = "var(--color-button-primary)";
+              e.currentTarget.style.boxShadow = "var(--color-button-primary-shadow)";
             }}
           >
             💾 保存更改
@@ -378,7 +381,7 @@ export function EditModal({ record, isOpen, onClose, onSave, onDelete }: Props) 
             disabled={isDeleting}
             style={{
               padding: "14px 20px",
-              backgroundColor: isDeleting ? "#434c5e" : "#bf616a",
+              backgroundColor: isDeleting ? "var(--color-danger-muted)" : "var(--color-danger)",
               color: "#fff",
               border: "none",
               borderRadius: "10px",
@@ -390,13 +393,13 @@ export function EditModal({ record, isOpen, onClose, onSave, onDelete }: Props) 
             }}
             onMouseEnter={(e) => {
               if (!isDeleting) {
-                e.currentTarget.style.backgroundColor = "#a5424a";
+                e.currentTarget.style.backgroundColor = "var(--color-danger-hover)";
                 e.currentTarget.style.boxShadow = "0 6px 16px rgba(191, 97, 106, 0.4)";
               }
             }}
             onMouseLeave={(e) => {
               if (!isDeleting) {
-                e.currentTarget.style.backgroundColor = "#bf616a";
+                e.currentTarget.style.backgroundColor = "var(--color-danger)";
                 e.currentTarget.style.boxShadow = "0 4px 12px rgba(191, 97, 106, 0.3)";
               }
             }}
@@ -409,7 +412,7 @@ export function EditModal({ record, isOpen, onClose, onSave, onDelete }: Props) 
         <div
           style={{
             fontSize: "11px",
-            color: "#4c566a",
+            color: "var(--color-text-secondary)",
             textAlign: "center",
             fontStyle: "italic",
             paddingTop: "8px",
