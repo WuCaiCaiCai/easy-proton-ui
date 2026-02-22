@@ -116,3 +116,22 @@ ea4ef57 add: gamescope
 18d233e fix: 修复强制关闭逻辑不关闭软件本身，优化workflow配置
 6902392 fix: 移除无效的includeReleaseNotes参数
 ```
+
+## v0.5.1 (2026-02-22)
+
+### 新功能
+- 自动发布脚本
+
+### 最近提交
+```
+0fdc6c1 继续重构UI，增加日夜模式切换
+d6a215a 重构UI
+4359f17 chore: release v0.5.0
+b37a807 使用Codex重构
+4b4b34a chore: release v0.4.0
+af3516c fix: 删除分辨率调整（Gamescope）部分，重构部分ui
+48183be chore: release v0.3.1
+ca9edf1 fix: fsr & gamescope
+d1b10be chore: release v0.3.0
+ea4ef57 add: gamescope
+```
