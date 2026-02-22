@@ -13,6 +13,7 @@ export interface AppConfig {
  * 扩展 AppConfig，添加元数据
  */
 export interface GameRecord extends AppConfig {
+    id: string;          // 稳定唯一 ID，不随路径变化
     name: string;        // 游戏显示名称
     time: number;        // 记录时间戳
     icon?: string;       // 游戏图标本地路径

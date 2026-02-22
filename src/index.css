@@ -1,241 +1,397 @@
-/* 全局主题变量 */
+/* ── 主题变量 ── */
 :root {
   color-scheme: dark;
-  --color-body-bg: #05000f;
-  --color-body-text: #f7f3ff;
-  --color-gradient-start: #4725a3;
-  --color-gradient-end: #05000f;
-  --color-text-primary: #fdfaff;
-  --color-text-secondary: #cdbdf1;
-  --color-text-placeholder: #8f7ab8;
-  --color-accent-primary: #f7c9ff;
-  --color-accent-strong: #d6a8ff;
-  --color-panel-bg: rgba(20, 7, 45, 0.85);
-  --color-panel-border: rgba(233, 221, 255, 0.18);
-  --color-panel-shadow: 0 32px 70px rgba(5, 0, 20, 0.85);
-  --color-input-bg: rgba(7, 2, 24, 0.9);
-  --color-input-border: rgba(200, 168, 255, 0.4);
-  --color-input-text: #fdfbff;
-  --color-scrollbar-track: rgba(74, 35, 120, 0.55);
-  --color-scrollbar-thumb: rgba(217, 179, 255, 0.8);
-  --color-scrollbar-thumb-hover: rgba(255, 228, 255, 0.95);
-  --color-button-primary: #be7bff;
-  --color-button-primary-hover: #d9abff;
-  --color-button-primary-shadow: 0 18px 38px rgba(190, 123, 255, 0.45);
-  --color-button-primary-shadow-hover: 0 22px 46px rgba(217, 171, 255, 0.55);
-  --color-button-disabled: rgba(143, 110, 194, 0.5);
-  --color-button-secondary: rgba(36, 10, 70, 0.85);
-  --color-button-secondary-hover: rgba(126, 63, 179, 0.85);
-  --color-button-secondary-shadow: 0 16px 34px rgba(0, 0, 0, 0.55);
-  --color-button-secondary-shadow-hover: 0 20px 38px rgba(89, 40, 140, 0.65);
-  --color-log-bg: rgba(4, 0, 15, 0.95);
-  --color-log-border: rgba(191, 155, 240, 0.3);
-  --color-log-text: #e7fde8;
-  --color-log-prefix: #f4c6ff;
-  --color-card-bg: rgba(24, 5, 49, 0.9);
-  --color-card-border: rgba(216, 191, 255, 0.35);
-  --color-card-shadow: 0 24px 55px rgba(8, 0, 26, 0.75);
-  --color-card-shadow-hover: 0 30px 65px rgba(114, 60, 185, 0.8);
-  --color-card-icon-bg: rgba(9, 1, 26, 0.85);
-  --color-card-icon-border: rgba(212, 182, 255, 0.4);
-  --color-card-icon-stroke: #f5d8ff;
-  --color-edit-button-bg: rgba(212, 181, 255, 0.22);
-  --color-edit-button-border: rgba(212, 181, 255, 0.4);
-  --color-edit-button-hover-bg: rgba(241, 210, 255, 0.4);
-  --color-edit-button-hover-shadow: 0 12px 30px rgba(214, 168, 255, 0.5);
-  --color-modal-bg: rgba(20, 6, 45, 0.92);
-  --color-modal-border: rgba(222, 201, 255, 0.22);
-  --color-modal-section-bg: rgba(39, 13, 78, 0.75);
-  --color-modal-section-border: rgba(233, 221, 255, 0.18);
-  --color-overlay: rgba(2, 0, 10, 0.65);
-  --color-close-button: #f5e1ff;
-  --color-close-button-hover: #ff94d1;
-  --color-close-button-hover-bg: rgba(255, 148, 209, 0.25);
-  --color-icon-accent: #ffb6ff;
-  --color-danger: #ff8bb7;
-  --color-danger-muted: rgba(109, 64, 124, 0.8);
-  --color-danger-hover: #ffadcb;
-  --color-danger-bg: rgba(255, 139, 183, 0.2);
-  --color-toggle-bg: rgba(71, 31, 121, 0.7);
-  --color-toggle-hover: rgba(168, 105, 255, 0.5);
-  --color-toggle-text: #fdf5ff;
-  --color-titlebar-bg: rgba(18, 5, 40, 0.92);
-  --color-titlebar-border: rgba(216, 190, 255, 0.2);
-  --color-titlebar-text: #f9f3ff;
-  --color-titlebar-subtext: #cbb9f3;
-  --color-titlebar-icon: #fefcff;
-  --color-titlebar-btn-hover: rgba(255, 255, 255, 0.12);
-  --color-titlebar-btn-close: rgba(255, 160, 208, 0.95);
-  --color-titlebar-btn-close-hover: #ffb6d1;
-  --color-titlebar-shadow: 0 26px 60px rgba(4, 0, 16, 0.9);
+  --bg:          #0d0d0f;
+  --bg-panel:    rgba(255,255,255,0.04);
+  --bg-input:    rgba(255,255,255,0.05);
+  --bg-card:     rgba(255,255,255,0.04);
+  --border:      rgba(255,255,255,0.08);
+  --border-focus:rgba(255,255,255,0.3);
+  --text:        #f0eef5;
+  --text-sub:    rgba(240,238,245,0.5);
+  --text-muted:  rgba(240,238,245,0.28);
+  --accent:      #c8b4fa;
+  --accent-dim:  rgba(200,180,250,0.12);
+  --danger:      #f87171;
+  --danger-dim:  rgba(248,113,113,0.12);
+  --shadow-md:   0 8px 24px rgba(0,0,0,0.5);
+  --card-bg:          rgba(255,255,255,0.04);
+  --card-bg-hover:    rgba(255,255,255,0.08);
+  --card-border:      rgba(255,255,255,0.12);
+  --card-border-hover:rgba(200,180,250,0.35);
+  --card-shadow:      0 8px 24px rgba(0,0,0,0.3);
+  --card-icon-bg:     rgba(255,255,255,0.05);
+  --card-icon-border: rgba(255,255,255,0.08);
+  --card-edit-bg:     rgba(255,255,255,0.08);
+  --card-edit-border: rgba(255,255,255,0.12);
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
 }
 
 :root[data-theme='light'] {
   color-scheme: light;
-  --color-body-bg: #fdf7ff;
-  --color-body-text: #2f1a47;
-  --color-gradient-start: #f6edff;
-  --color-gradient-end: #fdfbff;
-  --color-text-primary: #2f1a47;
-  --color-text-secondary: #6a4f92;
-  --color-text-placeholder: #9f89be;
-  --color-accent-primary: #c084fc;
-  --color-accent-strong: #8b5cf6;
-  --color-panel-bg: rgba(255, 255, 255, 0.97);
-  --color-panel-border: rgba(189, 163, 230, 0.3);
-  --color-panel-shadow: 0 28px 55px rgba(90, 54, 137, 0.18);
-  --color-input-bg: #ffffff;
-  --color-input-border: rgba(179, 152, 222, 0.4);
-  --color-input-text: #2f1a47;
-  --color-scrollbar-track: rgba(226, 209, 255, 0.7);
-  --color-scrollbar-thumb: rgba(188, 153, 234, 0.9);
-  --color-scrollbar-thumb-hover: rgba(139, 92, 246, 0.9);
-  --color-button-primary: #8b5cf6;
-  --color-button-primary-hover: #7c3aed;
-  --color-button-primary-shadow: 0 15px 32px rgba(139, 92, 246, 0.3);
-  --color-button-primary-shadow-hover: 0 20px 40px rgba(124, 58, 237, 0.35);
-  --color-button-disabled: rgba(139, 92, 246, 0.25);
-  --color-button-secondary: rgba(247, 240, 255, 0.95);
-  --color-button-secondary-hover: rgba(233, 222, 255, 1);
-  --color-button-secondary-shadow: 0 14px 28px rgba(85, 46, 130, 0.2);
-  --color-button-secondary-shadow-hover: 0 18px 34px rgba(85, 46, 130, 0.24);
-  --color-log-bg: #f4ecff;
-  --color-log-border: rgba(175, 143, 218, 0.35);
-  --color-log-text: #4b5563;
-  --color-log-prefix: #8b5cf6;
-  --color-card-bg: rgba(255, 255, 255, 0.98);
-  --color-card-border: rgba(186, 158, 227, 0.35);
-  --color-card-shadow: 0 18px 40px rgba(77, 45, 117, 0.18);
-  --color-card-shadow-hover: 0 24px 48px rgba(77, 45, 117, 0.22);
-  --color-card-icon-bg: rgba(243, 233, 255, 0.92);
-  --color-card-icon-border: rgba(194, 168, 233, 0.45);
-  --color-card-icon-stroke: #8b5cf6;
-  --color-edit-button-bg: rgba(139, 92, 246, 0.14);
-  --color-edit-button-border: rgba(139, 92, 246, 0.22);
-  --color-edit-button-hover-bg: rgba(139, 92, 246, 0.24);
-  --color-edit-button-hover-shadow: 0 12px 26px rgba(139, 92, 246, 0.25);
-  --color-modal-bg: #ffffff;
-  --color-modal-border: rgba(189, 163, 230, 0.3);
-  --color-modal-section-bg: rgba(247, 240, 255, 0.95);
-  --color-modal-section-border: rgba(199, 173, 235, 0.3);
-  --color-overlay: rgba(38, 10, 70, 0.4);
-  --color-close-button: #6a4f92;
-  --color-close-button-hover: #c026d3;
-  --color-close-button-hover-bg: rgba(192, 38, 211, 0.15);
-  --color-icon-accent: #c026d3;
-  --color-danger: #c026d3;
-  --color-danger-muted: rgba(236, 223, 255, 0.95);
-  --color-danger-hover: #9d174d;
-  --color-danger-bg: rgba(255, 149, 199, 0.16);
-  --color-toggle-bg: rgba(237, 226, 255, 0.9);
-  --color-toggle-hover: rgba(196, 181, 253, 0.85);
-  --color-toggle-text: #4c1d95;
-  --color-titlebar-bg: rgba(250, 244, 255, 0.92);
-  --color-titlebar-border: rgba(182, 154, 226, 0.35);
-  --color-titlebar-text: #2f1a47;
-  --color-titlebar-subtext: #7f5fab;
-  --color-titlebar-icon: #2f1a47;
-  --color-titlebar-btn-hover: rgba(139, 92, 246, 0.15);
-  --color-titlebar-btn-close: rgba(225, 29, 72, 0.9);
-  --color-titlebar-btn-close-hover: rgba(190, 18, 60, 0.95);
-  --color-titlebar-shadow: 0 24px 50px rgba(139, 92, 246, 0.2);
+  --bg:          #f5f3fa;
+  --bg-panel:    rgba(255,255,255,0.85);
+  --bg-input:    #ffffff;
+  --bg-card:     #ffffff;
+  --border:      rgba(0,0,0,0.08);
+  --border-focus:rgba(0,0,0,0.3);
+  --text:        #1a1625;
+  --text-sub:    rgba(26,22,37,0.55);
+  --text-muted:  rgba(26,22,37,0.32);
+  --accent:      #7c3aed;
+  --accent-dim:  rgba(124,58,237,0.1);
+  --danger:      #dc2626;
+  --danger-dim:  rgba(220,38,38,0.08);
+  --shadow-md:   0 8px 24px rgba(0,0,0,0.12);
+  --card-bg:          #ffffff;
+  --card-bg-hover:    #faf6ff;
+  --card-border:      rgba(26,22,37,0.08);
+  --card-border-hover:rgba(124,58,237,0.25);
+  --card-shadow:      0 12px 24px rgba(38,32,66,0.12);
+  --card-icon-bg:     #f6f1ff;
+  --card-icon-border: rgba(124,58,237,0.15);
+  --card-edit-bg:     #f3edff;
+  --card-edit-border: rgba(124,58,237,0.18);
 }
 
-/* 全局样式重置和KDE兼容性修复 */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+/* ── 重置 ── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+/* 白边修复：保证根节点和背景铺满 */
+html {
+  width: 100%; height: 100%;
+  background: var(--bg);
 }
-
-html,
+body, #root { width: 100%; height: 100%; overflow: hidden; }
 body {
-  margin: 0;
-  padding: 0;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-}
-
-#root {
-  width: 100%;
-  height: 100%;
-}
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: var(--color-body-bg);
-  color: var(--color-body-text);
 }
 
-/* KDE环境下的特殊修复 */
-@supports (-webkit-touch-callout: none) {
-  body {
-    background: var(--color-body-bg);
-  }
+/* ── 滚动条 ── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-focus); }
+
+/* ── 焦点 ── */
+:focus-visible { outline: 1.5px solid var(--accent); outline-offset: 2px; }
+button:focus:not(:focus-visible), input:focus:not(:focus-visible) { outline: none; }
+
+/* ── 布局 ── */
+.main-layout { height: 100vh; display: flex; flex-direction: column; background: var(--bg); }
+.scroll-area { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 24px 24px 32px; }
+.container { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+
+/* ── 标题栏 ── */
+.titlebar {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(16px) saturate(1.3);
+  -webkit-backdrop-filter: blur(16px) saturate(1.3);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  -webkit-app-region: drag;
+  flex-shrink: 0;
+}
+.titlebar-left { display: flex; align-items: center; gap: 10px; }
+.titlebar-icon {
+  width: 22px; height: 22px;
+  border-radius: 6px;
+  background: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800;
+  color: #0d0d0f;
+  flex-shrink: 0;
+}
+.titlebar-title { font-size: 13px; font-weight: 600; color: var(--text); }
+.titlebar-actions { display: flex; align-items: center; gap: 4px; -webkit-app-region: no-drag; }
+.titlebar-btn {
+  width: 32px; height: 28px;
+  border-radius: var(--r-sm);
+  background: transparent; border: none;
+  color: var(--text-sub);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.titlebar-btn:hover { background: var(--border); color: var(--text); }
+.titlebar-btn.danger:hover { background: var(--danger-dim); color: var(--danger); }
+.titlebar-btn svg { pointer-events: none; }
+
+/* ── 页头 ── */
+.page-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.page-header h1 { font-size: 20px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+.page-header p { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+
+.theme-btn {
+  width: 32px; height: 32px;
+  border-radius: var(--r-sm);
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  color: var(--text-sub);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 15px;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+.theme-btn:hover { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
+
+/* ── 区块标题 ── */
+.section-label {
+  font-size: 11px; font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.8px; text-transform: uppercase;
+  margin-bottom: 10px;
 }
 
-/* 滚动条样式统一 */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+/* ── 历史卡片 ── */
+.history-row {
+  display: flex; gap: 18px;
+  overflow-x: auto;
+  padding: 8px 4px 14px;  /* 上下留空间给 hover 动画和阴影 */
+}
+.history-empty { font-size: 13px; color: var(--text-muted); padding: 8px 0; }
+
+.game-card {
+  width: clamp(170px, 22vw, 220px);
+  min-width: clamp(170px, 22vw, 220px);
+  padding: clamp(18px, 2.6vw, 24px) clamp(16px, 2.2vw, 20px) clamp(14px, 2vw, 18px);
+  background: var(--card-bg);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  border: 1px solid var(--card-border);
+  border-radius: var(--r-lg);
+  cursor: pointer;
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: clamp(12px, 2vw, 16px);
+  position: relative;
+  transition: border-color 0.2s, background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+.game-card:hover {
+  border-color: var(--card-border-hover);
+  background: var(--card-bg-hover);
+  transform: translateY(-3px);
+  box-shadow: var(--card-shadow);
+}
+.game-card-icon {
+  width: clamp(64px, 8vw, 88px);
+  height: clamp(64px, 8vw, 88px);
+  border-radius: var(--r-md);
+  background: var(--card-icon-bg);
+  border: 1px solid var(--card-icon-border);
+  display: flex; align-items: center; justify-content: center;
+}
+.game-card-name {
+  font-size: 13px; font-weight: 600; color: var(--text);
+  width: 100%; text-align: center;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.game-card-date { font-size: 11px; color: var(--text-muted); }
+.game-card-edit {
+  position: absolute; top: 8px; right: 8px;
+  width: 24px; height: 24px;
+  border-radius: 6px;
+  background: var(--card-edit-bg);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--card-edit-border);
+  color: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; opacity: 0; padding: 0;
+  transition: opacity 0.15s, background 0.15s, color 0.15s;
+}
+.game-card:hover .game-card-edit { opacity: 1; }
+.game-card-edit:hover { background: var(--accent); color: #0d0d0f; }
+.game-card-edit svg { pointer-events: none; }
+
+/* ── 表单面板 ── */
+.form-panel {
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--r-lg);
+  padding: 20px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.field-label {
+  display: block;
+  font-size: 11px; font-weight: 600;
+  color: var(--text-sub);
+  margin-bottom: 6px; letter-spacing: 0.3px;
+}
+.input-box {
+  width: 100%; padding: 9px 12px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text); font-size: 13px;
+  transition: border-color 0.15s;
+}
+.input-box::placeholder { color: var(--text-muted); }
+.input-box:focus { border-color: var(--border-focus); outline: none; }
+
+/* ── PathSelector ── */
+.path-selector { display: flex; flex-direction: column; }
+.path-row { display: flex; gap: 8px; }
+.path-input {
+  flex: 1; padding: 9px 12px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text); font-size: 13px;
+}
+.path-input::placeholder { color: var(--text-muted); }
+.path-btn {
+  padding: 0 14px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(200,180,250,0.15);
+  border-radius: var(--r-sm);
+  color: var(--accent); font-size: 13px; font-weight: 600;
+  cursor: pointer; white-space: nowrap;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.path-btn:hover { background: var(--accent); color: #0d0d0f; border-color: var(--accent); }
+
+/* ── 按钮组 ── */
+.btn-row { display: flex; gap: 10px; }
+.btn-primary {
+  flex: 1; padding: 12px;
+  background: var(--accent); color: #0d0d0f;
+  border: none; border-radius: var(--r-md);
+  font-weight: 700; font-size: 14px; cursor: pointer;
+  transition: opacity 0.15s, transform 0.15s;
+}
+.btn-primary:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
+.btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.btn-secondary {
+  padding: 12px 18px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  color: var(--text-sub); font-weight: 600; font-size: 14px;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.btn-secondary:hover:not(:disabled) { border-color: var(--danger); color: var(--danger); background: var(--danger-dim); }
+.btn-secondary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── 日志 ── */
+.log-box {
+  background: rgba(0,0,0,0.25);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+  font-family: 'Fira Code', 'JetBrains Mono', 'Monaco', monospace;
+  font-size: 11.5px;
+  height: 140px; overflow-y: auto;
+  color: var(--text-sub); line-height: 1.7;
+}
+.log-header {
+  font-size: 10px; font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.8px; text-transform: uppercase;
+  margin-bottom: 8px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.log-line { display: flex; gap: 8px; }
+.log-prompt { color: var(--accent); flex-shrink: 0; opacity: 0.5; }
+.log-text { color: var(--text); }
+
+/* ── Modal ── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(6px);
+}
+.modal-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 24px;
+  width: 460px; max-width: 92vw; max-height: 88vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-md);
+  display: flex; flex-direction: column; gap: 20px;
+}
+.modal-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-bottom: 16px; border-bottom: 1px solid var(--border);
+}
+.modal-header h2 { font-size: 16px; font-weight: 700; color: var(--text); }
+.modal-close {
+  width: 28px; height: 28px;
+  border-radius: var(--r-sm);
+  background: transparent; border: none;
+  color: var(--text-muted); font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; padding: 0;
+  transition: background 0.15s, color 0.15s;
+}
+.modal-close:hover { background: var(--border); color: var(--text); }
+
+.modal-preview {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 12px;
+  display: flex; align-items: center; gap: 10px;
+}
+.modal-preview-icon {
+  width: 36px; height: 36px;
+  border-radius: var(--r-sm);
+  background: var(--bg-input); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.modal-preview-name { font-size: 14px; font-weight: 600; color: var(--text); }
+.modal-preview-file { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+.modal-form { display: flex; flex-direction: column; gap: 14px; }
+.modal-label { display: block; font-size: 11px; font-weight: 600; color: var(--text-sub); margin-bottom: 6px; }
+.modal-input {
+  width: 100%; padding: 9px 12px;
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: var(--r-sm); color: var(--text); font-size: 13px;
+  box-sizing: border-box; transition: border-color 0.15s;
+}
+.modal-input:focus { border-color: var(--border-focus); outline: none; }
+.modal-readonly {
+  width: 100%; padding: 9px 12px;
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: var(--r-sm); color: var(--text-muted); font-size: 12px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 
-::-webkit-scrollbar-track {
-  background: var(--color-scrollbar-track);
-  border-radius: 4px;
+.modal-actions {
+  display: flex; gap: 10px;
+  padding-top: 4px; border-top: 1px solid var(--border);
 }
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-scrollbar-thumb);
-  border-radius: 4px;
+.modal-save {
+  flex: 1; padding: 11px;
+  background: var(--accent); color: #0d0d0f;
+  border: none; border-radius: var(--r-sm);
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  transition: opacity 0.15s;
 }
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-scrollbar-thumb-hover);
+.modal-save:hover { opacity: 0.88; }
+.modal-delete {
+  padding: 11px 16px;
+  background: var(--danger-dim);
+  border: 1px solid rgba(248,113,113,0.15);
+  border-radius: var(--r-sm);
+  color: var(--danger); font-size: 13px; font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
-
-/* 输入框和按钮的焦点样式 */
-input:focus,
-button:focus,
-textarea:focus,
-select:focus {
-  outline: 2px solid var(--color-button-primary);
-  outline-offset: 2px;
-}
-
-/* 禁用文本选择 */
-.noselect {
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-
-/* 平滑过渡 */
-* {
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-}
-
-/* 字体渲染优化 */
-body {
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* 隐藏滚动条但保持滚动功能 */
-.scrollbar-hidden {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.scrollbar-hidden::-webkit-scrollbar {
-  display: none;
-}
+.modal-delete:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
+.modal-tip { font-size: 11px; color: var(--text-muted); text-align: center; }
