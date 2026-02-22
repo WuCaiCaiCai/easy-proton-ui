@@ -5,6 +5,11 @@
 
 set -e
 
+# 脚本所在目录与项目根目录
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$ROOT_DIR"
+
 # 颜色定义
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -40,8 +45,12 @@ git pull origin main
 # 2. 运行测试
 print_info "2. 运行测试..."
 npm run build
-cd src-tauri && cargo check
-cd ..
+if [ -d "src-tauri" ]; then
+    (cd src-tauri && cargo check)
+else
+    print_error "未找到 src-tauri 目录（期望路径: $ROOT_DIR/src-tauri）"
+    exit 1
+fi
 
 # 3. 更新版本号
 print_info "3. 更新版本号 ($VERSION_TYPE)..."
